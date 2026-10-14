@@ -1,5 +1,8 @@
 import Foundation
 import Network
+import OSLog
+
+private let wire = Logger(subsystem: "dev.antoine.SwiftDenon", category: "wire")
 
 /// Denon/Marantz receiver over the telnet-style control port.
 /// The receiver pushes status lines, so state is live without polling.
@@ -114,6 +117,7 @@ public actor DenonReceiver: Receiver {
         while let i = buffer.firstIndex(of: 13) {
             let line = String(decoding: buffer[buffer.startIndex..<i], as: UTF8.self)
             buffer.removeSubrange(buffer.startIndex...i)
+            wire.debug("RX \(line, privacy: .public)")
             if DenonProtocol.apply(line, to: &state) { changed = true }
         }
         if changed { continuation.yield(state) }
@@ -127,6 +131,7 @@ public actor DenonReceiver: Receiver {
 
     public func send(_ command: Command) async {
         for line in DenonProtocol.encode(command) {
+            wire.debug("TX \(line, privacy: .public)")
             connection?.send(content: Data((line + "\r").utf8), completion: .idempotent)
             try? await Task.sleep(nanoseconds: 50_000_000) // AVRs drop commands sent faster than ~50 ms
         }
