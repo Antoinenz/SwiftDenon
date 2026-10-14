@@ -47,6 +47,11 @@ public actor DenonReceiver: Receiver {
             guard let self else { return }
             Task { await self.handle(s, from: c) }
         }
+        // .waiting is transient (e.g. Local Network permission pending); give it time before failing.
+        Task {
+            try? await Task.sleep(nanoseconds: 15_000_000_000)
+            if connection === c, pending != nil { c.cancel() }
+        }
         try await withCheckedThrowingContinuation { (k: CheckedContinuation<Void, Error>) in
             pending = k
             c.start(queue: .global(qos: .userInitiated))
@@ -61,7 +66,7 @@ public actor DenonReceiver: Receiver {
             setConnected(true)
             receive(on: c)
             await send(.refresh)
-        case .waiting(let e), .failed(let e):
+        case .failed(let e):
             c.cancel()
             fail(e)
         case .cancelled:
