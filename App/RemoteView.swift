@@ -5,11 +5,14 @@ struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
     @State private var showSettings = false
 
+    private let playingHeight: CGFloat = 334
+    private let idleHeight: CGFloat = 188
+
     var body: some View {
         let zone = store.zone
+        let isPlaying = store.state.connected && zone.power
 
-        VStack(spacing: 28) {
-            header
+        Group {
             if !store.state.connected {
                 connecting
             } else if !zone.power {
@@ -19,12 +22,20 @@ struct RemoteView: View {
             }
         }
         .padding(.horizontal, 24)
-        .padding(.top, 36)
         .padding(.bottom, 24)
-        .frame(width: 380)
-        .animation(.snappy, value: zone.power)
-        .animation(.snappy, value: store.state.connected)
+        .frame(width: 380, height: isPlaying ? playingHeight : idleHeight, alignment: .top)
+        .animation(.smooth(duration: 0.35), value: isPlaying)
         .containerBackground(.ultraThinMaterial, for: .window)
+        .toolbar(removing: .title)
+        .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                if store.state.zones.count > 1 { ZonePicker() }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button("Settings", systemImage: "gearshape") { showSettings = true }
+            }
+        }
         .focusable()
         .focusEffectDisabled()
         .onKeyPress(.upArrow) { step(1); return .handled }
@@ -33,21 +44,13 @@ struct RemoteView: View {
         .sheet(isPresented: $showSettings) { SettingsView() }
     }
 
-    private var header: some View {
-        HStack {
-            if store.state.zones.count > 1 { ZonePicker() }
-            Spacer()
-            GlassCircleButton(symbol: "gearshape", size: 36) { showSettings = true }
-        }
-    }
-
     private var connecting: some View {
         VStack(spacing: 14) {
             ProgressView()
             Text(store.host.isEmpty ? "Looking for your receiver…" : "Connecting…")
                 .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, minHeight: 240)
+        .frame(maxWidth: .infinity, minHeight: 180)
     }
 
     private func standby(_ zone: Zone) -> some View {
@@ -56,7 +59,7 @@ struct RemoteView: View {
             Text(store.state.zones.count > 1 ? zone.name : store.displayName)
                 .font(.callout).foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, minHeight: 240)
+        .frame(maxWidth: .infinity, minHeight: 180)
     }
 
     private func playing(_ zone: Zone) -> some View {
@@ -71,7 +74,7 @@ struct RemoteView: View {
                 GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
                 GlassSlider(
                     value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
-                    range: 0...zone.maxVolume, dimmed: zone.mute, halfStep: zone.halfStep,
+                    range: 0...zone.maxVolume, dimmed: zone.mute, halfStep: store.useHalfSteps,
                     onEnd: { store.setVolume(zone.volume, final: true) }
                 )
                 GlassCircleButton(symbol: "plus", size: 40) { step(1) }
