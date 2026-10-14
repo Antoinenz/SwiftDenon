@@ -44,8 +44,10 @@ struct RemoteView: View {
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                if store.state.zones.count > 1 { ZonePicker() }
+                // Keep the slot filled so the gear stays on the right when there is no picker.
+                if store.state.zones.count > 1 { ZonePicker() } else { Color.clear.frame(width: 200, height: 1) }
             }
+            .sharedBackgroundVisibility(store.state.zones.count > 1 ? .automatic : .hidden)
             ToolbarItem(placement: .primaryAction) {
                 GlassCircleButton(symbol: "gearshape", size: 12, iconSize: 15) { showSettings = true }
             }
