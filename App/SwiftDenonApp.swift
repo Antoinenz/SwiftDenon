@@ -11,6 +11,7 @@ struct SwiftDenonApp: App {
                 .task { store.start() }
         }
         #if os(macOS)
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
         #endif
 

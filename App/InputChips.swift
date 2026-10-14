@@ -6,19 +6,23 @@ struct InputChips: View {
 
     var body: some View {
         let current = store.zone.input
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+        GlassEffectContainer(spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 8)], spacing: 8) {
                 ForEach(store.inputs) { input in
                     let selected = input.id == current
-                    Button(input.name) { store.setInput(input.id) }
-                        .buttonStyle(.plain)
-                        .padding(.horizontal, 14).padding(.vertical, 8)
-                        .background(selected ? AnyShapeStyle(.tint) : AnyShapeStyle(.quaternary), in: .capsule)
-                        .foregroundStyle(selected ? .white : .primary)
+                    Button { store.setInput(input.id) } label: {
+                        Text(input.name)
+                            .font(.subheadline.weight(selected ? .semibold : .regular))
+                            .lineLimit(1)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 9)
+                            .contentShape(.capsule)
+                    }
+                    .buttonStyle(.plain)
+                    .glassEffect(selected ? .regular.tint(.accentColor.opacity(0.55)).interactive() : .regular.interactive(),
+                                 in: .capsule)
                 }
             }
-            .padding(.vertical, 2)
         }
-        .scrollClipDisabled()
     }
 }

@@ -7,67 +7,76 @@ struct RemoteView: View {
     @State private var showMore = false
 
     var body: some View {
-        @Bindable var store = store
         let zone = store.zone
 
-        VStack(spacing: 28) {
+        VStack(spacing: 26) {
             header
-            Spacer(minLength: 0)
-            VStack(spacing: 4) {
+            VStack(spacing: 2) {
                 Text(zone.volume.formatted(.number.precision(.fractionLength(0...1))))
-                    .font(.system(size: 88, weight: .semibold, design: .rounded))
+                    .font(.system(size: 84, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .contentTransition(.numericText(value: zone.volume))
                     .opacity(zone.mute ? 0.3 : 1)
-                Text(zone.name).font(.callout).foregroundStyle(.secondary)
+                Text(store.state.connected ? zone.name : "Connecting…")
+                    .font(.callout).foregroundStyle(.secondary)
             }
-            Slider(
-                value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
-                in: 0...zone.maxVolume, step: 0.5,
-                onEditingChanged: { if !$0 { store.setVolume(zone.volume, final: true) } }
-            )
-            HStack(spacing: 20) {
-                round("power", on: zone.power) { store.setPower(!zone.power) }
-                round(zone.mute ? "speaker.slash.fill" : "speaker.wave.2.fill", on: zone.mute) { store.toggleMute() }
+            .padding(.top, 4)
+
+            HStack(spacing: 12) {
+                GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
+                GlassSlider(
+                    value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
+                    range: 0...zone.maxVolume, dimmed: zone.mute,
+                    onEnd: { store.setVolume(zone.volume, final: true) }
+                )
+                GlassCircleButton(symbol: "plus", size: 40) { step(1) }
             }
+
+            GlassEffectContainer(spacing: 16) {
+                HStack(spacing: 16) {
+                    GlassCircleButton(symbol: "power", active: zone.power, tint: .green) { store.setPower(!zone.power) }
+                    GlassCircleButton(symbol: zone.mute ? "speaker.slash.fill" : "speaker.wave.2.fill",
+                                      active: zone.mute, tint: .orange) { store.toggleMute() }
+                }
+            }
+
             InputChips()
-            Spacer(minLength: 0)
         }
-        .padding(24)
-        .frame(maxWidth: 440)
-        .frame(minWidth: 340, minHeight: 560)
+        .padding(.horizontal, 24)
+        .padding(.top, 36)
+        .padding(.bottom, 24)
+        .frame(width: 400)
         .animation(.snappy, value: zone)
+        .containerBackground(.ultraThinMaterial, for: .window)
+        .focusable()
+        .focusEffectDisabled()
+        .onKeyPress(.upArrow) { step(1); return .handled }
+        .onKeyPress(.downArrow) { step(-1); return .handled }
+        .onKeyPress(.space) { store.toggleMute(); return .handled }
         .sheet(isPresented: $showSettings) { SettingsView() }
         .sheet(isPresented: $showMore) { MoreSheet() }
         .onAppear { if store.host.isEmpty { showSettings = true } }
     }
 
-    private var header: some View {
-        HStack {
-            Image(systemName: "circle.fill")
-                .font(.system(size: 8))
-                .foregroundStyle(store.state.connected ? .green : .orange)
-            if store.state.zones.count > 1 { ZonePicker() }
-            Spacer()
-            Button { showMore = true } label: { Image(systemName: "slider.horizontal.3") }
-                .disabled(!store.state.connected)
-            Button { showSettings = true } label: { Image(systemName: "gearshape") }
-        }
-        .buttonStyle(.plain)
-        .font(.title3)
+    private func step(_ delta: Double) {
+        let z = store.zone
+        store.setVolume(min(z.maxVolume, max(0, z.volume + delta)), final: true)
     }
 
-    private func round(_ symbol: String, on: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.title2)
-                .frame(width: 64, height: 64)
-                .background(on ? AnyShapeStyle(.tint) : AnyShapeStyle(.quaternary), in: .circle)
-                .foregroundStyle(on ? .white : .primary)
+    private var header: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(store.state.connected ? .green : .orange)
+                .frame(width: 8, height: 8)
+            if store.state.zones.count > 1 { ZonePicker() }
+            Spacer()
+            GlassEffectContainer(spacing: 10) {
+                HStack(spacing: 10) {
+                    GlassCircleButton(symbol: "slider.horizontal.3", size: 36) { showMore = true }
+                        .disabled(!store.state.connected)
+                    GlassCircleButton(symbol: "gearshape", size: 36) { showSettings = true }
+                }
+            }
         }
-        .buttonStyle(.plain)
-        #if os(iOS)
-        .sensoryFeedback(.impact, trigger: on)
-        #endif
     }
 }
