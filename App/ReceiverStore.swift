@@ -147,6 +147,13 @@ final class ReceiverStore {
         send(.mute(zone: z, m))
     }
 
+    /// One step up or down (a whole number), for buttons and keys.
+    func stepVolume(by delta: Double) {
+        let z = zone
+        guard state.connected, z.power else { return }
+        setVolume(min(z.maxVolume, max(0, z.volume + delta)), final: true)
+    }
+
     func togglePower() {
         guard state.connected else { return }
         setPower(!zone.power)

@@ -171,40 +171,6 @@ struct SettingsView: View {
     }
 }
 
-/// A segmented control drawn as one glass capsule with a sliding selection,
-/// matching the zone picker in the main window's toolbar.
-struct GlassSegmented<Option: Hashable, Label: View>: View {
-    @Binding var selection: Option
-    let options: [Option]
-    @ViewBuilder let label: (Option) -> Label
-    @Namespace private var ns
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(options, id: \.self) { option in
-                Button { withAnimation(.snappy(duration: 0.3)) { selection = option } } label: {
-                    label(option)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(selection == option ? .primary : .secondary)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background {
-                            if selection == option {
-                                Capsule().fill(.clear)
-                                    .glassEffect(.regular.interactive(), in: .capsule)
-                                    .matchedGeometryEffect(id: "selection", in: ns)
-                            }
-                        }
-                        .contentShape(.capsule)
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(4)
-        .glassEffect(.regular, in: .capsule)
-    }
-}
-
 /// Bass / treble / sub as three glass faders.
 struct EQView: View {
     @Environment(ReceiverStore.self) private var store

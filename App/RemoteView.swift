@@ -59,8 +59,8 @@ struct RemoteView: View {
         }
         .focusable()
         .focusEffectDisabled()
-        .onKeyPress(.upArrow) { step(1); return .handled }
-        .onKeyPress(.downArrow) { step(-1); return .handled }
+        .onKeyPress(.upArrow) { store.stepVolume(by: 1); return .handled }
+        .onKeyPress(.downArrow) { store.stepVolume(by: -1); return .handled }
         .onKeyPress(.space) { store.toggleMute(); return .handled }
         .onKeyPress("m") { store.toggleMute(); return .handled }
         .onKeyPress("p") { store.togglePower(); return .handled }
@@ -110,10 +110,10 @@ struct RemoteView: View {
             if hideVolumeSlider {
                 // No slider: − and + sit either side of the number.
                 HStack(spacing: 20) {
-                    GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
+                    GlassCircleButton(symbol: "minus", size: 40) { store.stepVolume(by: -1) }
                         .opacity(zone.mute ? 0.35 : 1)
                     volumeNumber(zone).frame(minWidth: 150)
-                    GlassCircleButton(symbol: "plus", size: 40) { step(1) }
+                    GlassCircleButton(symbol: "plus", size: 40) { store.stepVolume(by: 1) }
                         .opacity(zone.mute ? 0.35 : 1)
                 }
                 .animation(.smooth(duration: 0.3), value: zone.mute)
@@ -124,13 +124,13 @@ struct RemoteView: View {
                     .padding(.top, 22)
                     .padding(.bottom, 10)
                 HStack(spacing: 12) {
-                    GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
+                    GlassCircleButton(symbol: "minus", size: 40) { store.stepVolume(by: -1) }
                     GlassSlider(
                         value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
                         range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
                         onEnd: { store.setVolume(zone.volume, final: true) }
                     )
-                    GlassCircleButton(symbol: "plus", size: 40) { step(1) }
+                    GlassCircleButton(symbol: "plus", size: 40) { store.stepVolume(by: 1) }
                 }
                 .opacity(zone.mute ? 0.35 : 1)
                 .animation(.smooth(duration: 0.3), value: zone.mute)
@@ -165,11 +165,5 @@ struct RemoteView: View {
         if UserDefaults.standard.bool(forKey: "debugStandby") { return false }   // `-debugStandby YES` for layout checks
         #endif
         return zone.power
-    }
-
-    private func step(_ delta: Double) {
-        let z = store.zone
-        guard z.power else { return }
-        store.setVolume(min(z.maxVolume, max(0, z.volume + delta)), final: true)
     }
 }
