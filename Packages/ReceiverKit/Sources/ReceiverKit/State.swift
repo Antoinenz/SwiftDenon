@@ -25,6 +25,7 @@ public struct ReceiverState: Sendable, Equatable {
     public var subLevel: Double?
     public var dynamicEQ: Bool?
     public var sleepMinutes: Int?   // nil = off
+    public var connected = false
     public init() {}
 
     public func zone(_ id: Int) -> Zone? { zones.first { $0.id == id } }
