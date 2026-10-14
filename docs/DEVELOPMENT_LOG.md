@@ -170,6 +170,14 @@ User: *"make sure the top bar is a modern swift ui liquid glass component too. t
 - Settings header rebuilt by hand: title aligned with the section headers, glass-prominent Done, and a glass segmented control (`GlassSegmented`). The native segmented picker inside a glass capsule drew a double outline.
 - *Arrow keys switch zones* swaps ←/→ and Tab. *Hide volume slider* moves − and + beside the number.
 
+## 24. Settings top bar, take two
+
+User: *"top bar doesnt have background. switcher still isnt liquid glass supported, and align in the top bar like the main window. while you at it update the done button to the latest rounded liquid glass"*
+
+- A real `.toolbar` on the sheet showed nothing (macOS sheets don't render toolbar items up top), so the bar stays hand-built.
+- `safeAreaBar` + hard scroll-edge effect gives it a toolbar backdrop.
+- One row like the main window: switcher centred, round glass-prominent checkmark on the right (the title was dropped, as in the main window). The switcher's selection is now a sliding glass lens.
+
 ---
 
 ## Testing notes that shaped the work

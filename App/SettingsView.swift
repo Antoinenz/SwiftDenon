@@ -26,27 +26,32 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .safeAreaInset(edge: .top, spacing: 0) { header }
+        .scrollEdgeEffectStyle(.hard, for: .top)
+        // safeAreaBar (not safeAreaInset) gives the bar the system scroll-edge blur.
+        .safeAreaBar(edge: .top, spacing: 0) { header }
         .frame(minWidth: 380, minHeight: 460)
     }
 
-    /// Title, Done and the page switcher. Built by hand: a sheet's navigation title is inset
-    /// on macOS and its principal toolbar item isn't shown.
+    /// Laid out like the main window's toolbar: switcher centred, round button on the right.
+    /// Built by hand because a sheet on macOS doesn't show toolbar items in its top bar.
     private var header: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Text("Settings").font(.title2.weight(.semibold))
-                Spacer()
-                Button("Done") { dismiss() }
-                    .buttonStyle(.glassProminent)
-                    .keyboardShortcut(.defaultAction)
-            }
+        ZStack {
             GlassSegmented(selection: $page, options: Page.allCases) { Text($0.rawValue) }
+            HStack {
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 15, weight: .semibold))
+                        .frame(width: 22, height: 22)
+                }
+                .buttonBorderShape(.circle)
+                .buttonStyle(.glassProminent)
+                .keyboardShortcut(.defaultAction)
+                .help("Done")
+            }
         }
-        .padding(.leading, 30)       // lines the title up with the section headers
-        .padding(.trailing, 20)
-        .padding(.top, 18)
-        .padding(.bottom, 6)
+        .padding(.horizontal, 14)
+        .frame(height: 52)
     }
 
     @ViewBuilder private var ampPage: some View {
@@ -185,7 +190,8 @@ struct GlassSegmented<Option: Hashable, Label: View>: View {
                         .padding(.vertical, 6)
                         .background {
                             if selection == option {
-                                Capsule().fill(.primary.opacity(0.14))
+                                Capsule().fill(.clear)
+                                    .glassEffect(.regular.interactive(), in: .capsule)
                                     .matchedGeometryEffect(id: "selection", in: ns)
                             }
                         }
@@ -195,7 +201,7 @@ struct GlassSegmented<Option: Hashable, Label: View>: View {
             }
         }
         .padding(4)
-        .glassEffect(.regular.interactive(), in: .capsule)
+        .glassEffect(.regular, in: .capsule)
     }
 }
 
