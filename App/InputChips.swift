@@ -19,6 +19,8 @@ struct InputPicker: View {
         } label: {
             HStack(spacing: 8) {
                 Text(name).font(.headline).lineLimit(1)
+                    .id(name)
+                    .transition(.blurReplace)
                 Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity)
@@ -29,5 +31,6 @@ struct InputPicker: View {
         .menuIndicator(.hidden)
         .buttonStyle(.plain)
         .glassEffect(.regular.interactive(), in: .capsule)
+        .animation(.snappy, value: name)
     }
 }
