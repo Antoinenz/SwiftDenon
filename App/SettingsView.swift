@@ -9,52 +9,105 @@ struct SettingsView: View {
     @State private var manualHost = ""
     @AppStorage("halfStepVolume") private var halfStepVolume = false
 
+    private enum Page: String, CaseIterable, Identifiable {
+        case amp = "Amp", zones = "Zones", general = "General"
+        var id: Self { self }
+    }
+    @State private var page = Page.amp
+
     var body: some View {
-        let s = store.state
         NavigationStack {
             Form {
-                if s.connected {
-                    Section("Sound") {
-                        Picker("Mode", selection: Binding(get: { s.soundMode ?? "" }, set: { store.setSoundMode($0) })) {
-                            if let m = s.soundMode, !DenonProtocol.soundModes.contains(m) { Text(m.capitalized).tag(m) }
-                            ForEach(DenonProtocol.soundModes, id: \.self) { Text($0.capitalized).tag($0) }
-                        }
-                        if s.zone(1)?.halfStep == true || s.zones.contains(where: \.halfStep) {
-                            Toggle("Half-step volume", isOn: $halfStepVolume)
-                        }
-                        if let v = s.dynamicEQ {
-                            Toggle("Dynamic EQ", isOn: Binding(get: { v }, set: { store.setDynamicEQ($0) }))
-                        }
-                        Picker("Sleep timer", selection: Binding(get: { s.sleepMinutes ?? 0 },
-                                                                 set: { store.setSleep($0 == 0 ? nil : $0) })) {
-                            Text("Off").tag(0)
-                            ForEach([15, 30, 60, 90, 120], id: \.self) { Text("\($0) min").tag($0) }
-                        }
-                    }
-                    if s.bass != nil || s.treble != nil || s.subLevel != nil {
-                        Section("Equalizer") { EQView() }
-                    }
+                switch page {
+                case .amp: ampPage
+                case .zones: zonesPage
+                case .general: generalPage
                 }
-                if s.connected {
-                    Section("Zone names") {
-                        ForEach(s.zones) { z in
-                            TextField(z.name, text: Binding(get: { store.zoneNames[z.id] ?? "" },
-                                                            set: { store.setZoneName($0, for: z.id) }))
-                        }
-                    }
-                }
-                receiverSection
             }
             .formStyle(.grouped)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                Picker("Page", selection: $page) {
+                    ForEach(Page.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+            }
             .navigationTitle("Settings")
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+            }
         }
         .frame(minWidth: 380, minHeight: 460)
     }
 
+    @ViewBuilder private var ampPage: some View {
+        let s = store.state
+        receiverSection
+        if s.connected {
+            Section("Sound") {
+                Picker("Mode", selection: Binding(get: { s.soundMode ?? "" }, set: { store.setSoundMode($0) })) {
+                    if let m = s.soundMode, !DenonProtocol.soundModes.contains(m) { Text(m.capitalized).tag(m) }
+                    ForEach(DenonProtocol.soundModes, id: \.self) { Text($0.capitalized).tag($0) }
+                }
+                if let v = s.dynamicEQ {
+                    Toggle("Dynamic EQ", isOn: Binding(get: { v }, set: { store.setDynamicEQ($0) }))
+                }
+                Picker("Sleep timer", selection: Binding(get: { s.sleepMinutes ?? 0 },
+                                                         set: { store.setSleep($0 == 0 ? nil : $0) })) {
+                    Text("Off").tag(0)
+                    ForEach([15, 30, 60, 90, 120], id: \.self) { Text("\($0) min").tag($0) }
+                }
+            }
+            if s.bass != nil || s.treble != nil || s.subLevel != nil {
+                Section("Equalizer") { EQView() }
+            }
+        }
+    }
+
+    @ViewBuilder private var zonesPage: some View {
+        let s = store.state
+        if s.connected {
+            Section {
+                ForEach(s.zones) { z in
+                    TextField(z.name, text: Binding(get: { store.zoneNames[z.id] ?? "" },
+                                                    set: { store.setZoneName($0, for: z.id) }))
+                }
+            } header: {
+                Text("Names")
+            } footer: {
+                Text("Names are stored in this app only; the receiver doesn't share them.")
+            }
+        } else {
+            Section { Text("Connect to a receiver to edit its zones.").foregroundStyle(.secondary) }
+        }
+    }
+
+    @ViewBuilder private var generalPage: some View {
+        let s = store.state
+        Section("Volume") {
+            Toggle("Half-step volume", isOn: $halfStepVolume)
+                .disabled(!s.zones.contains(where: \.halfStep))
+        }
+        Section {
+            Toggle("Demo mode", isOn: Binding(get: { store.demoMode }, set: { store.setDemoMode($0) }))
+        } header: {
+            Text("Demo")
+        } footer: {
+            Text("Try the app with a simulated receiver. Your real receiver isn't touched.")
+        }
+        Section("About") {
+            LabeledContent("Version", value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")
+        }
+    }
+
     private var receiverSection: some View {
         Section("Receiver") {
-            if !store.host.isEmpty {
+            if store.demoMode {
+                Label("Demo Receiver", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+                Text("Demo mode is on. Turn it off in General to use a real receiver.").foregroundStyle(.secondary)
+            } else if !store.host.isEmpty {
                 LabeledContent {
                     Text(store.host).foregroundStyle(.secondary)
                 } label: {
@@ -62,32 +115,34 @@ struct SettingsView: View {
                         .foregroundStyle(store.state.connected ? .green : .secondary)
                 }
             }
-            ForEach(store.discovered.filter { $0.host != store.host }) { r in
-                Button { store.select(host: r.host); dismiss() } label: {
-                    LabeledContent(r.name, value: r.host)
-                }
-            }
-            HStack {
-                Button("Search again") { store.search() }.disabled(store.scanning)
-                if store.scanning { ProgressView().controlSize(.small) }
-                Spacer()
-                if store.webUIAvailable, let url = store.webUIURL {
-                    Button("Open web interface", systemImage: "safari") { openURL(url) }
-                }
-            }
-            DisclosureGroup("Enter address manually") {
-                HStack {
-                    TextField("192.168.1.50", text: $manualHost)
-                        .autocorrectionDisabled()
-                        #if os(iOS)
-                        .keyboardType(.numbersAndPunctuation)
-                        .textInputAutocapitalization(.never)
-                        #endif
-                    Button("Connect") {
-                        store.select(host: manualHost.trimmingCharacters(in: .whitespaces))
-                        dismiss()
+            if !store.demoMode {
+                ForEach(store.discovered.filter { $0.host != store.host }) { r in
+                    Button { store.select(host: r.host); dismiss() } label: {
+                        LabeledContent(r.name, value: r.host)
                     }
-                    .disabled(manualHost.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+                HStack {
+                    Button("Search again") { store.search() }.disabled(store.scanning)
+                    if store.scanning { ProgressView().controlSize(.small) }
+                    Spacer()
+                    if store.webUIAvailable, let url = store.webUIURL {
+                        Button("Open web interface", systemImage: "safari") { openURL(url) }
+                    }
+                }
+                DisclosureGroup("Enter address manually") {
+                    HStack {
+                        TextField("192.168.1.50", text: $manualHost)
+                            .autocorrectionDisabled()
+                            #if os(iOS)
+                            .keyboardType(.numbersAndPunctuation)
+                            .textInputAutocapitalization(.never)
+                            #endif
+                        Button("Connect") {
+                            store.select(host: manualHost.trimmingCharacters(in: .whitespaces))
+                            dismiss()
+                        }
+                        .disabled(manualHost.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
                 }
             }
         }
