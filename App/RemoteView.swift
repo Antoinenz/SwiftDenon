@@ -4,27 +4,31 @@ import ReceiverKit
 struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
     @State private var showSettings = false
+    /// Natural height of whichever state view is showing; drives the window height.
+    @State private var contentHeight: CGFloat = 300
 
-    private let playingHeight: CGFloat = 374
-    private let idleHeight: CGFloat = 226
+    private let edge: CGFloat = 24            // gap above and below standby content
 
     var body: some View {
         let zone = store.zone
-        let isPlaying = store.state.connected && zone.power
+        let isPlaying = store.state.connected && zonePower(zone)
 
         Group {
             if !store.state.connected {
                 connecting
-            } else if !zone.power {
+            } else if !zonePower(zone) {
                 standby(zone)
             } else {
                 playing(zone)
             }
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 24)
-        .frame(width: 380, height: isPlaying ? playingHeight : idleHeight, alignment: .top)
+        .frame(width: 380, alignment: .top)
+        .frame(maxHeight: .infinity, alignment: .top)
         .animation(.smooth(duration: 0.35), value: isPlaying)
+        #if os(macOS)
+        .background(WindowHeightAnimator(height: contentHeight))
+        #endif
         .containerBackground(.ultraThinMaterial, for: .window)
         .toolbar(removing: .title)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
@@ -50,18 +54,20 @@ struct RemoteView: View {
             Text(store.host.isEmpty ? "Looking for your receiver…" : "Connecting…")
                 .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, minHeight: 180)
+        .padding(.vertical, 48)
+        .frame(maxWidth: .infinity)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
     }
 
     private func standby(_ zone: Zone) -> some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
             GlassCircleButton(symbol: "power", size: 96) { store.setPower(true) }
-                .padding(.top, 22)
-            Text(store.state.zones.count > 1 ? zone.name : store.displayName)
+            Text(store.state.zones.count > 1 ? store.name(of: zone) : store.displayName)
                 .font(.callout).foregroundStyle(.secondary)
-                .padding(.bottom, 10)
         }
-        .frame(maxWidth: .infinity, minHeight: 180)
+        .padding(.vertical, edge)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+        .transition(.opacity)
     }
 
     private func playing(_ zone: Zone) -> some View {
@@ -92,8 +98,17 @@ struct RemoteView: View {
             }
             InputPicker()
         }
+        .padding(.bottom, 24)
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
         .animation(.snappy, value: store.zoneID)
-        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+        .transition(.opacity)
+    }
+
+    private func zonePower(_ zone: Zone) -> Bool {
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "debugStandby") { return false }   // `-debugStandby YES` for layout checks
+        #endif
+        return zone.power
     }
 
     private func step(_ delta: Double) {
