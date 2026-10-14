@@ -87,7 +87,8 @@ public enum DenonProtocol {
                 state.update(zone: 1) { $0.maxVolume = v }
             }
         } else if l.hasPrefix("MV") {
-            if let v = parseVolume(String(l.dropFirst(2))) { state.update(zone: 1) { $0.volume = v } }
+            let digits = String(l.dropFirst(2))
+            if let v = parseVolume(digits) { state.update(zone: 1) { $0.volume = v; if digits.count == 3 { $0.halfStep = true } } }
         } else if l.hasPrefix("MU") {
             if l == "MUON" || l == "MUOFF" { state.update(zone: 1) { $0.mute = l == "MUON" } }
         } else if l.hasPrefix("SSFUN") {
@@ -135,11 +136,15 @@ public enum DenonProtocol {
         case "MUON", "MUOFF": state.update(zone: z) { $0.mute = r == "MUON" }
         default:
             if let v = parseVolume(r) {
-                state.update(zone: z) { $0.volume = v }
-            } else if r.allSatisfy({ $0.isUppercase || $0.isNumber || $0 == "/" }),
-                      !r.hasPrefix("PS"), !r.hasPrefix("CS"), !r.hasPrefix("HP"), !["UP", "DOWN"].contains(r) {
+                state.update(zone: z) { $0.volume = v; if r.count == 3 { $0.halfStep = true } }
+            } else if isSourceCode(r, state) {
                 state.update(zone: z) { $0.input = r }
             }
         }
+    }
+
+    /// Zone lines also carry sleep, tone, etc. Only accept tokens that are real sources.
+    private static func isSourceCode(_ r: String, _ state: ReceiverState) -> Bool {
+        defaultSources.contains { $0.id == r } || state.sourceOrder.contains(r) || r == "SOURCE"
     }
 }

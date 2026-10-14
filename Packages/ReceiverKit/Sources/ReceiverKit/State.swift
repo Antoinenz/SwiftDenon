@@ -14,7 +14,10 @@ public struct Zone: Hashable, Sendable, Identifiable {
     public var maxVolume: Double = 98
     public var mute = false
     public var input: String?
-    public init(id: Int, name: String) { self.id = id; self.name = name }
+    /// Whether the zone takes 0.5 volume steps. Main usually does; Zone 2/3 usually don't.
+    /// Learned from the receiver's own 3-digit volume reports.
+    public var halfStep: Bool
+    public init(id: Int, name: String) { self.id = id; self.name = name; halfStep = id == 1 }
 }
 
 public struct ReceiverState: Sendable, Equatable {
