@@ -27,3 +27,10 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
         ENABLE_APP_SANDBOX: YES
         ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+schemes:
+  SwiftDenon:
+    build:
+      targets:
+        SwiftDenon: all
+    run:
+      config: Debug
