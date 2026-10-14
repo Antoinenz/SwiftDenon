@@ -1,9 +1,11 @@
 import SwiftUI
+import ReceiverKit
 
 struct SettingsView: View {
     @Environment(ReceiverStore.self) private var store
     @Environment(\.dismiss) private var dismiss
     @State private var host = ""
+    @State private var found: [DiscoveredReceiver] = []
 
     var body: some View {
         NavigationStack {
@@ -15,6 +17,16 @@ struct SettingsView: View {
                         .keyboardType(.numbersAndPunctuation)
                         .textInputAutocapitalization(.never)
                         #endif
+                }
+                if !found.isEmpty {
+                    Section("Found on network") {
+                        ForEach(found) { r in
+                            Button { host = r.host } label: {
+                                LabeledContent(r.name, value: r.host)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
             }
             .formStyle(.grouped)
@@ -33,5 +45,8 @@ struct SettingsView: View {
         }
         .frame(minWidth: 340, minHeight: 220)
         .onAppear { host = store.host }
+        .task {
+            for await r in Discovery.stream() where !found.contains(r) { found.append(r) }
+        }
     }
 }
