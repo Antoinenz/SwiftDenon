@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("halfStepVolume") private var halfStepVolume = false
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
+    @AppStorage("showInMenuBar") private var showInMenuBar = true
 
     private enum Page: String, CaseIterable, Identifiable {
         case amp = "Amp", zones = "Zones", general = "General"
@@ -112,6 +113,15 @@ struct SettingsView: View {
                  ? "← → switch zones, Tab steps through inputs."
                  : "← → step through inputs, Tab switches zones.")
         }
+        #if os(macOS)
+        Section {
+            Toggle("Show in menu bar", isOn: $showInMenuBar)
+        } header: {
+            Text("Menu Bar")
+        } footer: {
+            Text("A compact controller for the selected zone.")
+        }
+        #endif
         Section {
             Toggle("Demo mode", isOn: Binding(get: { store.demoMode }, set: { store.setDemoMode($0) }))
         } header: {
