@@ -75,4 +75,20 @@ import Testing
         #expect(s.inputs.map(\.id) == ["MPLAY", "AUX1", "TUNER"])
         #expect(s.inputs.map(\.name) == ["Apple TV", "Pool Room", "Tuner"])
     }
+
+    @Test func halfStepLearnedFromReports() {
+        var s = ReceiverState()
+        #expect(s.zone(1)?.halfStep == true)
+        DenonProtocol.apply("Z242", to: &s)
+        #expect(s.zone(2)?.halfStep == false)
+        DenonProtocol.apply("Z2425", to: &s)
+        #expect(s.zone(2)?.halfStep == true)
+    }
+
+    @Test func zoneSleepLineIsNotAnInput() {
+        var s = ReceiverState()
+        DenonProtocol.apply("Z2AUX1", to: &s)
+        DenonProtocol.apply("Z2SLPOFF", to: &s)
+        #expect(s.zone(2)?.input == "AUX1")
+    }
 }
