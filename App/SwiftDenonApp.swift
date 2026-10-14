@@ -13,5 +13,12 @@ struct SwiftDenonApp: App {
         #if os(macOS)
         .windowResizability(.contentSize)
         #endif
+
+        #if os(macOS)
+        MenuBarExtra("SwiftDenon", systemImage: "hifispeaker.2.fill") {
+            MenuBarView().environment(store)
+        }
+        .menuBarExtraStyle(.window)
+        #endif
     }
 }
