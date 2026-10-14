@@ -14,7 +14,7 @@ final class ReceiverStore {
     private(set) var zoneNames: [Int: String] = [:]
 
     private var receiverName: String?
-    private var receiver: DenonReceiver?
+    private var receiver: (any Receiver)?
     private var listener: Task<Void, Never>?
     private var connector: Task<Void, Never>?
     private var lastVolumeSend = Date.distantPast
@@ -42,6 +42,16 @@ final class ReceiverStore {
         UserDefaults.standard.set(Dictionary(uniqueKeysWithValues: zoneNames.map { (String($0), $1) }), forKey: "zoneNames")
     }
 
+    /// Runs against an in-memory receiver instead of real hardware.
+    var demoMode = UserDefaults.standard.bool(forKey: "demoMode")
+
+    func setDemoMode(_ on: Bool) {
+        demoMode = on
+        UserDefaults.standard.set(on, forKey: "demoMode")
+        zoneID = 1
+        start()
+    }
+
     var displayName: String { state.friendlyName ?? receiverName ?? "Receiver" }
 
     // MARK: Connection
@@ -49,10 +59,15 @@ final class ReceiverStore {
     /// Connects to the saved receiver, or searches the network and connects to the first one found.
     func start() {
         stop()
-        guard !host.isEmpty else { search(autoConnect: true); return }
-        // "address" or "address:port" (port defaults to the receiver's telnet port).
-        let parts = host.split(separator: ":", maxSplits: 1).map(String.init)
-        let r = DenonReceiver(host: parts[0], port: parts.count > 1 ? UInt16(parts[1]) ?? DenonProtocol.port : DenonProtocol.port)
+        let r: any Receiver
+        if demoMode {
+            r = DemoReceiver()
+        } else {
+            guard !host.isEmpty else { search(autoConnect: true); return }
+            // "address" or "address:port" (port defaults to the receiver's telnet port).
+            let parts = host.split(separator: ":", maxSplits: 1).map(String.init)
+            r = DenonReceiver(host: parts[0], port: parts.count > 1 ? UInt16(parts[1]) ?? DenonProtocol.port : DenonProtocol.port)
+        }
         receiver = r
         listener = Task {
             var checkedWeb = false
@@ -62,7 +77,7 @@ final class ReceiverStore {
                     receiverName = n
                     UserDefaults.standard.set(n, forKey: "name")
                 }
-                if s.connected, !checkedWeb {
+                if s.connected, !checkedWeb, !demoMode {
                     checkedWeb = true
                     webUIAvailable = await WebUI.isAvailable(host: host)
                 }
@@ -117,7 +132,7 @@ final class ReceiverStore {
 
     func send(_ command: Command) {
         guard let r = receiver else { return }
-        Task { await r.send(command) }
+        Task { try? await r.send(command) }
     }
 
     func setPower(_ on: Bool) {
