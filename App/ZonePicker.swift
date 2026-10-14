@@ -7,7 +7,7 @@ struct ZonePicker: View {
     var body: some View {
         @Bindable var store = store
         Picker("Zone", selection: $store.zoneID) {
-            ForEach(store.state.zones) { Text($0.name).tag($0.id) }
+            ForEach(store.state.zones) { Text(store.name(of: $0)).tag($0.id) }
         }
         .pickerStyle(.segmented)
         .labelsHidden()

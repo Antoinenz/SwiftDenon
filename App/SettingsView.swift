@@ -35,6 +35,14 @@ struct SettingsView: View {
                         Section("Equalizer") { EQView() }
                     }
                 }
+                if s.connected {
+                    Section("Zone names") {
+                        ForEach(s.zones) { z in
+                            TextField(z.name, text: Binding(get: { store.zoneNames[z.id] ?? "" },
+                                                            set: { store.setZoneName($0, for: z.id) }))
+                        }
+                    }
+                }
                 receiverSection
             }
             .formStyle(.grouped)

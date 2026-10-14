@@ -10,6 +10,8 @@ final class ReceiverStore {
     var scanning = false
     var webUIAvailable = false
     private(set) var host: String
+    /// The amp doesn't expose its zone names, so they are set locally.
+    private(set) var zoneNames: [Int: String] = [:]
 
     private var receiverName: String?
     private var receiver: DenonReceiver?
@@ -20,6 +22,8 @@ final class ReceiverStore {
     init() {
         host = UserDefaults.standard.string(forKey: "host") ?? ""
         receiverName = UserDefaults.standard.string(forKey: "name")
+        let saved = UserDefaults.standard.dictionary(forKey: "zoneNames") as? [String: String] ?? [:]
+        zoneNames = Dictionary(uniqueKeysWithValues: saved.compactMap { k, v in Int(k).map { ($0, v) } })
         let launchZone = UserDefaults.standard.integer(forKey: "zone") // `-zone 2` launch argument
         if launchZone > 0 { zoneID = launchZone }
     }
@@ -27,6 +31,14 @@ final class ReceiverStore {
     var zone: Zone { state.zone(zoneID) ?? Zone(id: zoneID, name: "Main") }
     /// 0.5 steps are opt-in, and only for zones the receiver reports them for.
     var useHalfSteps: Bool { zone.halfStep && UserDefaults.standard.bool(forKey: "halfStepVolume") }
+    func name(of zone: Zone) -> String { zoneNames[zone.id] ?? zone.name }
+
+    func setZoneName(_ name: String, for id: Int) {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        zoneNames[id] = trimmed.isEmpty ? nil : trimmed
+        UserDefaults.standard.set(Dictionary(uniqueKeysWithValues: zoneNames.map { (String($0), $1) }), forKey: "zoneNames")
+    }
+
     var displayName: String { state.friendlyName ?? receiverName ?? "Receiver" }
 
     // MARK: Connection
