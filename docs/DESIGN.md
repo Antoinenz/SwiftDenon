@@ -30,3 +30,7 @@
 ## Reference apps
 
 Searches found no strong direct references. The design follows Apple's Liquid Glass guidance (glass for the control layer, `GlassEffectContainer`, native button styles, toolbar glass) and the macOS Tahoe menu bar's transparent, expand-in-place feel. VolumeGlass (a minimal volume overlay) was the closest comparable.
+
+## App icon
+
+`App/AppIcon.icon` is an Icon Composer document (open it in Icon Composer, which ships inside Xcode). A white volume knob with a blue indicator at about 70%, ringed by eleven scale dots: lit up to the indicator, faint after it. Three glass groups give Liquid Glass depth: indicator on top, knob in the middle, scale at the back. Each shape is a 1024x1024 SVG in `Assets/`, so layers line up without positioning. Previews can be rendered with `ictool` (`Icon Composer.app/Contents/Executables/ictool`).

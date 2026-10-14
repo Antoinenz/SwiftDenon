@@ -7,4 +7,4 @@
 - Second brand driver (Yamaha YXC HTTP/JSON, Onkyo eISCP) behind the existing `Receiver` protocol.
 - Sound mode list per model (currently a generic Denon list).
 - Surround/channel levels and Audyssey settings.
-- App icon, signing and notarisation, license.
+- Signing and notarisation.

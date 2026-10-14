@@ -1,0 +1,89 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.30000,0.52000,1.00000,1.00000",
+      "display-p3:0.16000,0.20000,0.78000,1.00000"
+    ]
+  },
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "display-p3:0.20000,0.32000,0.92000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "display-p3:0.40000,0.58000,1.00000,1.00000"
+              }
+            }
+          ],
+          "glass" : true,
+          "image-name" : "Indicator.svg",
+          "name" : "Indicator"
+        }
+      ],
+      "name" : "Indicator",
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.4
+      },
+      "translucency" : {
+        "enabled" : false,
+        "value" : 0
+      }
+    },
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "Knob.svg",
+          "name" : "Knob"
+        }
+      ],
+      "name" : "Knob",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
+      }
+    },
+    {
+      "layers" : [
+        {
+          "glass" : true,
+          "image-name" : "Ticks Lit.svg",
+          "name" : "Ticks Lit"
+        },
+        {
+          "glass" : true,
+          "image-name" : "Ticks Dim.svg",
+          "name" : "Ticks Dim",
+          "opacity" : 0.35
+        }
+      ],
+      "name" : "Scale",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.3
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.4
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
