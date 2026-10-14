@@ -50,7 +50,9 @@ final class ReceiverStore {
     func start() {
         stop()
         guard !host.isEmpty else { search(autoConnect: true); return }
-        let r = DenonReceiver(host: host)
+        // "address" or "address:port" (port defaults to the receiver's telnet port).
+        let parts = host.split(separator: ":", maxSplits: 1).map(String.init)
+        let r = DenonReceiver(host: parts[0], port: parts.count > 1 ? UInt16(parts[1]) ?? DenonProtocol.port : DenonProtocol.port)
         receiver = r
         listener = Task {
             var checkedWeb = false
