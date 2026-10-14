@@ -7,22 +7,23 @@ import AppKit
 /// so the frame is stepped manually with the same easing in both directions.
 struct WindowHeightAnimator: NSViewRepresentable {
     let height: CGFloat   // height of the content area below the toolbar
+    var width: CGFloat = 380
 
     @MainActor
     final class Coordinator {
         var sized = false
         var timer: Timer?
 
-        func resize(_ w: NSWindow, toContent height: CGFloat, animated: Bool) {
+        func resize(_ w: NSWindow, toContent height: CGFloat, width: CGFloat, animated: Bool) {
             timer?.invalidate()
             let chrome = w.frame.height - w.contentLayoutRect.height
             let target = height + chrome
             let startHeight = w.frame.height
-            guard abs(startHeight - target) > 0.5 else { return }
+            guard abs(startHeight - target) > 0.5 || abs(w.frame.width - width) > 0.5 else { return }
             let top = w.frame.maxY
 
             func set(_ h: CGFloat) {
-                w.setFrame(NSRect(x: w.frame.minX, y: top - h, width: w.frame.width, height: h), display: true)
+                w.setFrame(NSRect(x: w.frame.minX, y: top - h, width: width, height: h), display: true)
             }
             guard animated else { set(target); return }
 
@@ -51,7 +52,7 @@ struct WindowHeightAnimator: NSViewRepresentable {
             coordinator.sized = true
             w.styleMask.remove(.resizable)          // height is driven by content, not by dragging
             w.standardWindowButton(.zoomButton)?.isEnabled = false
-            coordinator.resize(w, toContent: height, animated: !first)
+            coordinator.resize(w, toContent: height, width: width, animated: !first)
         }
     }
 }

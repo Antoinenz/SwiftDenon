@@ -9,8 +9,12 @@ struct SwiftDenonApp: App {
             RemoteView()
                 .environment(store)
                 .task { store.start() }
+                #if DEBUG
+                .preferredColorScheme(UserDefaults.standard.bool(forKey: "debugLight") ? .light : nil)   // `-debugLight YES`
+                #endif
         }
         #if os(macOS)
+        .defaultSize(width: 380, height: 300)
         .windowResizability(.contentMinSize)
         #endif
 
