@@ -40,7 +40,7 @@ final class ReceiverStore {
         listener = Task {
             var checkedWeb = false
             for await s in r.states {
-                state = s
+                state = reconcile(s)
                 if let n = s.friendlyName, n != receiverName {
                     receiverName = n
                     UserDefaults.standard.set(n, forKey: "name")
@@ -90,6 +90,7 @@ final class ReceiverStore {
         if let r = receiver { Task { await r.disconnect() } }
         receiver = nil
         state = ReceiverState()
+        pending.removeAll()
         webUIAvailable = false
     }
 
@@ -103,33 +104,83 @@ final class ReceiverStore {
     }
 
     func setPower(_ on: Bool) {
-        state.update(zone: zoneID) { $0.power = on }
-        send(.power(zone: zoneID, on: on))
+        let z = zoneID
+        hold("power\(z)", for: 4, matches: { $0.zone(z)?.power == on }) { $0.update(zone: z) { $0.power = on } }
+        send(.power(zone: z, on: on))
     }
 
     func toggleMute() {
-        let m = !zone.mute
-        state.update(zone: zoneID) { $0.mute = m }
-        send(.mute(zone: zoneID, m))
+        let z = zoneID, m = !zone.mute
+        hold("mute\(z)", matches: { $0.zone(z)?.mute == m }) { $0.update(zone: z) { $0.mute = m } }
+        send(.mute(zone: z, m))
     }
 
     func setInput(_ id: String) {
-        state.update(zone: zoneID) { $0.input = id }
-        send(.input(zone: zoneID, id))
+        let z = zoneID
+        hold("input\(z)", matches: { $0.zone(z)?.input == id }) { $0.update(zone: z) { $0.input = id } }
+        send(.input(zone: z, id))
     }
 
     /// Slider drags are throttled to ~10 commands/s; the final value is always sent.
     func setVolume(_ raw: Double, final: Bool = false) {
+        let z = zoneID
         let v = useHalfSteps ? (raw * 2).rounded() / 2 : raw.rounded()
-        state.update(zone: zoneID) { $0.volume = v }
+        hold("volume\(z)", for: 1, matches: { $0.zone(z)?.volume == v }) { $0.update(zone: z) { $0.volume = v } }
         guard final || Date().timeIntervalSince(lastVolumeSend) > 0.1 else { return }
         lastVolumeSend = Date()
-        send(.volume(zone: zoneID, v))
+        send(.volume(zone: z, v))
     }
 
-    func setBass(_ v: Int) { state.bass = v; send(.bass(v)) }
-    func setTreble(_ v: Int) { state.treble = v; send(.treble(v)) }
-    func setSub(_ v: Int) { state.subLevel = Double(v); send(.subLevel(Double(v))) }
+    func setBass(_ v: Int) {
+        hold("bass", matches: { $0.bass == v }) { $0.bass = v }
+        send(.bass(v))
+    }
+    func setTreble(_ v: Int) {
+        hold("treble", matches: { $0.treble == v }) { $0.treble = v }
+        send(.treble(v))
+    }
+    func setSub(_ v: Int) {
+        hold("sub", matches: { $0.subLevel == Double(v) }) { $0.subLevel = Double(v) }
+        send(.subLevel(Double(v)))
+    }
+    func setSoundMode(_ m: String) {
+        hold("mode", matches: { $0.soundMode == m }) { $0.soundMode = m }
+        send(.soundMode(m))
+    }
+    func setDynamicEQ(_ on: Bool) {
+        hold("dyneq", matches: { $0.dynamicEQ == on }) { $0.dynamicEQ = on }
+        send(.dynamicEQ(on))
+    }
+    func setSleep(_ minutes: Int?) {
+        hold("sleep", matches: { $0.sleepMinutes == minutes }) { $0.sleepMinutes = minutes }
+        send(.sleep(minutes: minutes))
+    }
+
+    // MARK: Optimistic updates
+
+    /// A local change shown immediately and kept on screen until the receiver confirms it
+    /// (or a timeout passes), so stale status lines in between can't flicker the UI back.
+    private struct Pending {
+        let expires: Date
+        let matches: (ReceiverState) -> Bool
+        let apply: (inout ReceiverState) -> Void
+    }
+    private var pending: [String: Pending] = [:]
+
+    private func hold(_ key: String, for seconds: Double = 1.5,
+                      matches: @escaping (ReceiverState) -> Bool,
+                      apply: @escaping (inout ReceiverState) -> Void) {
+        apply(&state)
+        pending[key] = Pending(expires: .now + seconds, matches: matches, apply: apply)
+    }
+
+    private func reconcile(_ incoming: ReceiverState) -> ReceiverState {
+        var s = incoming
+        for (key, p) in pending {
+            if p.matches(s) || p.expires < .now { pending[key] = nil } else { p.apply(&s) }
+        }
+        return s
+    }
 }
 
 /// The receiver's built-in web interface, when it answers on port 80.

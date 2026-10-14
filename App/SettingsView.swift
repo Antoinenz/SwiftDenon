@@ -15,7 +15,7 @@ struct SettingsView: View {
             Form {
                 if s.connected {
                     Section("Sound") {
-                        Picker("Mode", selection: Binding(get: { s.soundMode ?? "" }, set: { store.send(.soundMode($0)) })) {
+                        Picker("Mode", selection: Binding(get: { s.soundMode ?? "" }, set: { store.setSoundMode($0) })) {
                             if let m = s.soundMode, !DenonProtocol.soundModes.contains(m) { Text(m.capitalized).tag(m) }
                             ForEach(DenonProtocol.soundModes, id: \.self) { Text($0.capitalized).tag($0) }
                         }
@@ -23,10 +23,10 @@ struct SettingsView: View {
                             Toggle("Half-step volume", isOn: $halfStepVolume)
                         }
                         if let v = s.dynamicEQ {
-                            Toggle("Dynamic EQ", isOn: Binding(get: { v }, set: { store.send(.dynamicEQ($0)) }))
+                            Toggle("Dynamic EQ", isOn: Binding(get: { v }, set: { store.setDynamicEQ($0) }))
                         }
                         Picker("Sleep timer", selection: Binding(get: { s.sleepMinutes ?? 0 },
-                                                                 set: { store.send(.sleep(minutes: $0 == 0 ? nil : $0)) })) {
+                                                                 set: { store.setSleep($0 == 0 ? nil : $0) })) {
                             Text("Off").tag(0)
                             ForEach([15, 30, 60, 90, 120], id: \.self) { Text("\($0) min").tag($0) }
                         }
