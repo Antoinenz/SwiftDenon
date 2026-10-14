@@ -25,9 +25,15 @@ struct GlassSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
     var dimmed = false
+    /// Zone supports 0.5 steps. Even then, fast drags snap to whole numbers.
+    var halfStep = false
     var onEnd: () -> Void = {}
 
     private let thumb: CGFloat = 30
+    @State private var lastX: CGFloat = 0
+    @State private var lastTime: Date = .distantPast
+    @State private var speed: CGFloat = 0   // smoothed points/second
+    private let fastSpeed: CGFloat = 350
 
     var body: some View {
         GeometryReader { geo in
@@ -48,11 +54,21 @@ struct GlassSlider: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { g in
+                        let now = g.time
+                        let dt = now.timeIntervalSince(lastTime)
+                        if dt > 0.3 { speed = 0 }                    // new drag
+                        else if dt > 0 { speed = speed * 0.6 + abs(g.location.x - lastX) / dt * 0.4 }
+                        lastX = g.location.x; lastTime = now
                         let f = min(1, max(0, (g.location.x - thumb / 2) / usable))
                         let raw = range.lowerBound + Double(f) * (range.upperBound - range.lowerBound)
-                        value = (raw * 2).rounded() / 2
+                        value = halfStep && speed < fastSpeed ? (raw * 2).rounded() / 2 : raw.rounded()
                     }
-                    .onEnded { _ in onEnd() }
+                    .onEnded { _ in
+                        // Settle on a half step only if the drag ended slowly.
+                        if !(halfStep && speed < fastSpeed) { value = value.rounded() }
+                        speed = 0; lastTime = .distantPast
+                        onEnd()
+                    }
             )
         }
         .frame(height: thumb + 6)
