@@ -4,17 +4,9 @@ import AppKit
 import UIKit
 #endif
 
-/// Trackpad haptics on Mac, Taptic Engine on iPhone.
+/// Slider detents only: trackpad haptics on Mac, Taptic Engine on iPhone. Buttons rely on the trackpad's own click.
 @MainActor
 enum Haptics {
-    static func tap() {
-        #if os(macOS)
-        NSHapticFeedbackManager.defaultPerformer.perform(.generic, performanceTime: .now)
-        #else
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-        #endif
-    }
-
     static func tick() {
         #if os(macOS)
         NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)

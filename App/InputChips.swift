@@ -12,7 +12,7 @@ struct InputPicker: View {
 
         Menu {
             ForEach(inputs) { input in
-                Button { Haptics.tap(); store.setInput(input.id) } label: {
+                Button { store.setInput(input.id) } label: {
                     if input.id == current { Label(input.name, systemImage: "checkmark") } else { Text(input.name) }
                 }
             }
