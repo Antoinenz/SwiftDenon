@@ -23,7 +23,7 @@ final class ReceiverStore {
         host = UserDefaults.standard.string(forKey: "host") ?? ""
         receiverName = UserDefaults.standard.string(forKey: "name")
         let saved = UserDefaults.standard.dictionary(forKey: "zoneNames") as? [String: String] ?? [:]
-        zoneNames = Dictionary(uniqueKeysWithValues: saved.compactMap { k, v in Int(k).map { ($0, v) } })
+        zoneNames = Dictionary(uniqueKeysWithValues: saved.compactMap { k, v in Int(k).map { ($0, String(v.prefix(Self.maxZoneNameLength))) } })
         let launchZone = UserDefaults.standard.integer(forKey: "zone") // `-zone 2` launch argument
         if launchZone > 0 { zoneID = launchZone }
     }
@@ -31,10 +31,13 @@ final class ReceiverStore {
     var zone: Zone { state.zone(zoneID) ?? Zone(id: zoneID, name: "Main") }
     /// 0.5 steps are opt-in, and only for zones the receiver reports them for.
     var useHalfSteps: Bool { zone.halfStep && UserDefaults.standard.bool(forKey: "halfStepVolume") }
+    /// Keeps the toolbar's zone picker from overflowing.
+    static let maxZoneNameLength = 12
+
     func name(of zone: Zone) -> String { zoneNames[zone.id] ?? zone.name }
 
     func setZoneName(_ name: String, for id: Int) {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = String(name.trimmingCharacters(in: .whitespaces).prefix(Self.maxZoneNameLength))
         zoneNames[id] = trimmed.isEmpty ? nil : trimmed
         UserDefaults.standard.set(Dictionary(uniqueKeysWithValues: zoneNames.map { (String($0), $1) }), forKey: "zoneNames")
     }

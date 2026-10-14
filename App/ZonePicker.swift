@@ -11,6 +11,6 @@ struct ZonePicker: View {
         }
         .pickerStyle(.segmented)
         .labelsHidden()
-        .fixedSize()
+        .frame(maxWidth: 200)
     }
 }
