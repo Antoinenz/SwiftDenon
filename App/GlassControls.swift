@@ -9,7 +9,7 @@ struct GlassCircleButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button { Haptics.tap(); action() } label: {
             Image(systemName: symbol)
                 .font(.system(size: size * 0.38, weight: .medium))
                 .frame(width: size, height: size)
@@ -17,9 +17,6 @@ struct GlassCircleButton: View {
         }
         .buttonStyle(.plain)
         .glassEffect(active ? .regular.tint(tint.opacity(0.55)).interactive() : .regular.interactive(), in: .circle)
-        #if os(iOS)
-        .sensoryFeedback(.impact, trigger: active)
-        #endif
     }
 }
 
@@ -59,5 +56,38 @@ struct GlassSlider: View {
             )
         }
         .frame(height: thumb + 6)
+    }
+}
+
+/// Vertical glass slider used for the EQ bands. Integer steps, centered at zero.
+struct VerticalGlassSlider: View {
+    @Binding var value: Int
+    let range: ClosedRange<Int>
+
+    private let thumb: CGFloat = 28
+
+    var body: some View {
+        GeometryReader { geo in
+            let usable = max(1, geo.size.height - thumb)
+            let f = Double(value - range.lowerBound) / Double(range.upperBound - range.lowerBound)
+            let y = usable * (1 - CGFloat(f))
+            ZStack(alignment: .top) {
+                Capsule().fill(.primary.opacity(0.12)).frame(width: 8)
+                    .frame(maxWidth: .infinity)
+                Circle().fill(.clear)
+                    .frame(width: thumb, height: thumb)
+                    .glassEffect(.regular.interactive(), in: .circle)
+                    .frame(maxWidth: .infinity)
+                    .offset(y: y)
+            }
+            .contentShape(.rect)
+            .gesture(
+                DragGesture(minimumDistance: 0).onChanged { g in
+                    let p = min(1, max(0, 1 - (g.location.y - thumb / 2) / usable))
+                    let v = range.lowerBound + Int((p * Double(range.upperBound - range.lowerBound)).rounded())
+                    if v != value { value = v }
+                }
+            )
+        }
     }
 }
