@@ -46,7 +46,7 @@ struct MoreSheet: View {
     }
 
     private func stepper(_ title: String, _ value: Int, _ range: ClosedRange<Int>, _ unit: String,
-                         set: @escaping @Sendable (Int) -> Void) -> some View {
+                         set: @escaping @MainActor (Int) -> Void) -> some View {
         Stepper(value: Binding(get: { value }, set: set), in: range) {
             LabeledContent(title, value: "\(value > 0 ? "+" : "")\(value) \(unit)")
         }
