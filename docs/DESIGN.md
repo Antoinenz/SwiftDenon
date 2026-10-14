@@ -16,7 +16,7 @@
 ## Decisions and why
 
 - **Inputs as a dropdown, not chips.** A chip grid crowded the window. A glass button + popover matches the other buttons (a `Menu` drew its own flat bezel under the glass). Popover rows use a capsule highlight to match the popover's large corner radius.
-- **−/+ buttons stay.** An early version removed them; they are useful on a trackpad, and arrow keys also work (↑/↓ volume, Space mute).
+- **−/+ buttons stay.** An early version removed them; they are useful on a trackpad, and the keyboard covers everything: ↑/↓ volume, ←/→ input, Space or M mute, P power, 1/2/3 or Tab zones. Plain keys rather than ⌘ shortcuts, handled with `onKeyPress` on the main view only, so they never fire while typing in Settings.
 - **Volume number animates** with `contentTransition(.numericText)`; the animation must be attached directly to the number (a view-wide animation was removed by mistake once).
 - **Whole-number volume by default.** Half steps are opt-in and only for zones that support them. Even when enabled, fast slider drags snap to whole numbers (speed threshold ≈ 350 pt/s) so the number stays readable; the thumb itself follows the pointer smoothly and only the reported value snaps.
 - **Haptics only on sliders.** The trackpad already clicks for buttons. Slider detents use `NSHapticFeedbackManager` (`UIFeedbackGenerator` on iOS).

@@ -63,5 +63,6 @@ Use `--rendition Dark` for dark mode.
 - Slider: smooth thumb, whole numbers; half-step setting on: slow = .5, fast = whole.
 - Input popover: names match the amp, hidden inputs absent, capsule hover highlight.
 - Long zone names (12 chars) fit the toolbar.
+- Keyboard: ←/→ cycle inputs (wrapping, ignored when the zone is off), P toggles power, M/Space mute, 1/2/3 and Tab switch zones.
 - Disconnected or single zone: gear stays top right, no empty glass pill.
 - Settings: Amp / Zones / General pages switch; demo mode toggles without touching the saved host.

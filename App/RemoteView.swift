@@ -60,6 +60,15 @@ struct RemoteView: View {
         .onKeyPress(.upArrow) { step(1); return .handled }
         .onKeyPress(.downArrow) { step(-1); return .handled }
         .onKeyPress(.space) { store.toggleMute(); return .handled }
+        .onKeyPress("m") { store.toggleMute(); return .handled }
+        .onKeyPress("p") { store.togglePower(); return .handled }
+        .onKeyPress(.leftArrow) { store.cycleInput(by: -1); return .handled }
+        .onKeyPress(.rightArrow) { store.cycleInput(by: 1); return .handled }
+        .onKeyPress(.tab) { store.cycleZone(); return .handled }
+        .onKeyPress(characters: .init(charactersIn: "123")) { press in
+            store.selectZone(at: Int(press.characters)! - 1)
+            return .handled
+        }
         .sheet(isPresented: $showSettings) { SettingsView() }
     }
 

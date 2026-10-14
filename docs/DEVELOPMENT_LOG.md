@@ -154,6 +154,13 @@ User: *"design an icon"*, then *"not a massive fan, it needs to fit the apple ic
 
 User: *"rewrite the readme to follow this template"* (the user's Claudeometer and battery-tray READMEs): centred logo, title and tagline, features, installation, usage, how it works, development, screenshots, licence.
 
+## 22. Connecting state and keyboard shortcuts
+
+User: *"please center loading vertically in the window"*, then *"a few more keyboard shortcuts, like a key to turn on and off a zone, maybe even switch between inputs and zones"*
+
+- The connecting view is centred in the whole window: its bottom padding includes the toolbar height.
+- Keys: ←/→ inputs, P power, M mute (Space still works), 1/2/3 zones, Tab next zone. Checked against the fake receiver with the wire log.
+
 ---
 
 ## Testing notes that shaped the work

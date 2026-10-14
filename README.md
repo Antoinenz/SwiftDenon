@@ -52,7 +52,11 @@ Developed and tested against a Denon AVR-X2700H. Other Denon and Marantz receive
 | Action | Result |
 |--------|--------|
 | **↑ / ↓** | Volume up or down |
-| **Space** | Mute or unmute |
+| **← / →** | Previous or next input |
+| **Space** or **M** | Mute or unmute |
+| **P** | Turn the zone on or off |
+| **1 / 2 / 3** | Switch to Main, Zone 2 or Zone 3 |
+| **Tab** | Next zone |
 | **Drag** the slider | Set the volume. Fast drags skip half steps |
 | **Click** the zone picker | Switch between zones |
 | **Click** the input name | Pick an input |

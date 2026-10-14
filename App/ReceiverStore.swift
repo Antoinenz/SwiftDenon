@@ -147,6 +147,32 @@ final class ReceiverStore {
         send(.mute(zone: z, m))
     }
 
+    func togglePower() {
+        guard state.connected else { return }
+        setPower(!zone.power)
+    }
+
+    /// Steps through the receiver's enabled inputs, wrapping at either end.
+    func cycleInput(by offset: Int) {
+        let inputs = state.inputs
+        guard state.connected, zone.power, !inputs.isEmpty else { return }
+        let current = inputs.firstIndex { $0.id == zone.input }
+        let next = current.map { ($0 + offset + inputs.count) % inputs.count } ?? 0
+        setInput(inputs[next].id)
+    }
+
+    /// Selects the zone at `index` in the zone list (0 = Main).
+    func selectZone(at index: Int) {
+        guard state.zones.indices.contains(index) else { return }
+        zoneID = state.zones[index].id
+    }
+
+    func cycleZone() {
+        let zones = state.zones
+        guard zones.count > 1, let i = zones.firstIndex(where: { $0.id == zoneID }) else { return }
+        zoneID = zones[(i + 1) % zones.count].id
+    }
+
     func setInput(_ id: String) {
         let z = zoneID
         hold("input\(z)", matches: { $0.zone(z)?.input == id }) { $0.update(zone: z) { $0.input = id } }
