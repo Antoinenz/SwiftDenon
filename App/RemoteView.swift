@@ -11,6 +11,7 @@ struct RemoteView: View {
     private let defaultHeights: [Kind: CGFloat] = [.connecting: 200, .standby: 178, .playing: 380]
 
     private let edge: CGFloat = 40            // gap above and below standby content
+    @State private var toolbarHeight: CGFloat = 0
 
     var body: some View {
         let zone = store.zone
@@ -22,6 +23,7 @@ struct RemoteView: View {
         Color.clear
             .frame(width: 380)
             .frame(minHeight: 100, maxHeight: .infinity)
+            .onGeometryChange(for: CGFloat.self) { $0.safeAreaInsets.top } action: { toolbarHeight = $0 }
             .overlay(alignment: .top) {
                 Group {
                     if !store.state.connected {
@@ -67,7 +69,10 @@ struct RemoteView: View {
             Text(store.host.isEmpty ? "Looking for your receiver…" : "Connecting…")
                 .foregroundStyle(.secondary)
         }
-        .padding(.vertical, 48)
+        // Centred in the whole window, not just below the toolbar: the extra bottom
+        // padding matches the toolbar's height.
+        .padding(.top, 36)
+        .padding(.bottom, 36 + toolbarHeight)
         .frame(maxWidth: .infinity)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heights[.connecting] = $0 }
     }
