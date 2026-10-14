@@ -47,4 +47,4 @@ Enable network control on the receiver if it won't connect (Settings > Network >
 
 ## License
 
-To be added.
+MIT
