@@ -57,6 +57,8 @@ Developed and tested against a Denon AVR-X2700H. Other Denon and Marantz receive
 | **P** | Turn the zone on or off |
 | **1 / 2 / 3** | Switch to Main, Zone 2 or Zone 3 |
 | **Tab** | Next zone |
+
+Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number.
 | **Drag** the slider | Set the volume. Fast drags skip half steps |
 | **Click** the zone picker | Switch between zones |
 | **Click** the input name | Pick an input |

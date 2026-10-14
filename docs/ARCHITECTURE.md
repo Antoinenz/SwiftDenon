@@ -33,10 +33,10 @@
 - **Optimistic updates**: every setter calls `hold(key, matches:, apply:)`, which applies the change to local state immediately and registers a pending override. Incoming states pass through `reconcile`, which re-applies any override until the receiver confirms it (`matches`) or a timeout passes (1–1.5 s, 4 s for power). This prevents stale status lines from flickering the UI back.
 - **Volume**: `setVolume` rounds to whole numbers unless the zone supports half steps and the user enabled "Half-step volume". Sends are throttled to ~10/s; the final value is always sent.
 - **Views**: `RemoteView` shows one of three states: connecting, standby (single large power button) or playing (volume, slider, ±, power/mute, input). `GlassControls.swift` has the glass button, the volume slider (thumb follows the pointer; the reported value snaps, and fast drags skip half steps) and the vertical EQ slider.
-- **Settings**: one sheet with a segmented switcher at the top (in a `safeAreaInset`, since a sheet's principal toolbar item doesn't show on macOS) and three pages:
+- **Settings**: one sheet with a hand-built header in a `safeAreaInset` (a sheet's navigation title is inset on macOS and its principal toolbar item isn't shown): title, glass-prominent Done, and `GlassSegmented`, a single glass capsule with a sliding selection that matches the toolbar zone picker. Three pages:
   - **Amp**: receiver connection (switching, search, manual address, web-interface link), sound mode, dynamic EQ, sleep timer, EQ faders.
   - **Zones**: local zone names.
-  - **General**: half-step volume, demo mode, version.
+  - **General**: half-step volume, hide volume slider (− / + then sit either side of the number), arrow keys switch zones (swaps ←/→ and Tab), demo mode, version.
 - **Toolbar**: the principal slot always holds something (the zone picker, or a clear 200 pt spacer with its glass background hidden) so the gear stays on the right when there is only one zone or no connection.
 - **Shortcuts**: `Intents.swift` opens a short-lived connection to the saved receiver for power, volume, mute and input.
 

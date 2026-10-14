@@ -4,6 +4,8 @@ import ReceiverKit
 struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
     @State private var showSettings = false
+    @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
+    @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     private enum Kind: Hashable { case connecting, standby, playing }
     /// Natural height per state view. Each view only writes its own entry, so a view that is
     /// fading out can't overwrite the height of the one fading in.
@@ -62,9 +64,10 @@ struct RemoteView: View {
         .onKeyPress(.space) { store.toggleMute(); return .handled }
         .onKeyPress("m") { store.toggleMute(); return .handled }
         .onKeyPress("p") { store.togglePower(); return .handled }
-        .onKeyPress(.leftArrow) { store.cycleInput(by: -1); return .handled }
-        .onKeyPress(.rightArrow) { store.cycleInput(by: 1); return .handled }
-        .onKeyPress(.tab) { store.cycleZone(); return .handled }
+        // ←/→ and Tab swap roles when "Arrow keys switch zones" is on.
+        .onKeyPress(.leftArrow) { arrowKeysSwitchZones ? store.cycleZone(by: -1) : store.cycleInput(by: -1); return .handled }
+        .onKeyPress(.rightArrow) { arrowKeysSwitchZones ? store.cycleZone(by: 1) : store.cycleInput(by: 1); return .handled }
+        .onKeyPress(.tab) { arrowKeysSwitchZones ? store.cycleInput(by: 1) : store.cycleZone(by: 1); return .handled }
         .onKeyPress(characters: .init(charactersIn: "123")) { press in
             store.selectZone(at: Int(press.characters)! - 1)
             return .handled
@@ -104,26 +107,34 @@ struct RemoteView: View {
 
     private func playing(_ zone: Zone) -> some View {
         VStack(spacing: 26) {
-            Text(zone.volume.formatted(.number.precision(store.useHalfSteps ? .fractionLength(1) : .fractionLength(0...1))))
-                .font(.system(size: 84, weight: .semibold, design: .rounded))
-                .monospacedDigit()
-                .contentTransition(.numericText(value: zone.volume))
-                .animation(.snappy(duration: 0.25), value: zone.volume)
-                .opacity(zone.mute ? 0.3 : 1)
+            if hideVolumeSlider {
+                // No slider: − and + sit either side of the number.
+                HStack(spacing: 20) {
+                    GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
+                        .opacity(zone.mute ? 0.35 : 1)
+                    volumeNumber(zone).frame(minWidth: 150)
+                    GlassCircleButton(symbol: "plus", size: 40) { step(1) }
+                        .opacity(zone.mute ? 0.35 : 1)
+                }
                 .animation(.smooth(duration: 0.3), value: zone.mute)
                 .padding(.top, 22)
-                .padding(.bottom, 10)
-            HStack(spacing: 12) {
-                GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
-                GlassSlider(
-                    value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
-                    range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
-                    onEnd: { store.setVolume(zone.volume, final: true) }
-                )
-                GlassCircleButton(symbol: "plus", size: 40) { step(1) }
+                .padding(.bottom, 4)
+            } else {
+                volumeNumber(zone)
+                    .padding(.top, 22)
+                    .padding(.bottom, 10)
+                HStack(spacing: 12) {
+                    GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
+                    GlassSlider(
+                        value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
+                        range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
+                        onEnd: { store.setVolume(zone.volume, final: true) }
+                    )
+                    GlassCircleButton(symbol: "plus", size: 40) { step(1) }
+                }
+                .opacity(zone.mute ? 0.35 : 1)
+                .animation(.smooth(duration: 0.3), value: zone.mute)
             }
-            .opacity(zone.mute ? 0.35 : 1)
-            .animation(.smooth(duration: 0.3), value: zone.mute)
             GlassEffectContainer(spacing: 16) {
                 HStack(spacing: 16) {
                     GlassCircleButton(symbol: "power", active: true, tint: .green) { store.setPower(false) }
@@ -137,6 +148,16 @@ struct RemoteView: View {
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heights[.playing] = $0 }
         .animation(.snappy, value: store.zoneID)
         .transition(.opacity)
+    }
+
+    private func volumeNumber(_ zone: Zone) -> some View {
+        Text(zone.volume.formatted(.number.precision(store.useHalfSteps ? .fractionLength(1) : .fractionLength(0...1))))
+            .font(.system(size: 84, weight: .semibold, design: .rounded))
+            .monospacedDigit()
+            .contentTransition(.numericText(value: zone.volume))
+            .animation(.snappy(duration: 0.25), value: zone.volume)
+            .opacity(zone.mute ? 0.3 : 1)
+            .animation(.smooth(duration: 0.3), value: zone.mute)
     }
 
     private func zonePower(_ zone: Zone) -> Bool {

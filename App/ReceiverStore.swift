@@ -167,10 +167,10 @@ final class ReceiverStore {
         zoneID = state.zones[index].id
     }
 
-    func cycleZone() {
+    func cycleZone(by offset: Int) {
         let zones = state.zones
         guard zones.count > 1, let i = zones.firstIndex(where: { $0.id == zoneID }) else { return }
-        zoneID = zones[(i + 1) % zones.count].id
+        zoneID = zones[(i + offset + zones.count) % zones.count].id
     }
 
     func setInput(_ id: String) {

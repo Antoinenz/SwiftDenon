@@ -161,6 +161,15 @@ User: *"please center loading vertically in the window"*, then *"a few more keyb
 - The connecting view is centred in the whole window: its bottom padding includes the toolbar height.
 - Keys: ←/→ inputs, P power, M mute (Space still works), 1/2/3 zones, Tab next zone. Checked against the fake receiver with the wire log.
 
+## 23. Selector positions, settings header, two new settings
+
+User asked whether to swap the zone and input selectors. Recommendation: keep them. The zone picker scopes the whole window and lives in the toolbar, which never moves; at the bottom it would jump as the window resizes between standby and playing, and an input picker would be meaningless while a zone is off.
+
+User: *"make sure the top bar is a modern swift ui liquid glass component too. theres also an akward gap to the left of the settigns window title. add an app setting to invert the zone selector and input selctor keybinds, and a setting that disabled the volume slider, and aligns the -+ volume buttons horizontally on either side of the volume display"*
+
+- Settings header rebuilt by hand: title aligned with the section headers, glass-prominent Done, and a glass segmented control (`GlassSegmented`). The native segmented picker inside a glass capsule drew a double outline.
+- *Arrow keys switch zones* swaps ←/→ and Tab. *Hide volume slider* moves − and + beside the number.
+
 ---
 
 ## Testing notes that shaped the work
