@@ -21,6 +21,8 @@ final class ReceiverStore {
     init() {
         host = UserDefaults.standard.string(forKey: "host") ?? ""
         receiverName = UserDefaults.standard.string(forKey: "name")
+        let launchZone = UserDefaults.standard.integer(forKey: "zone") // `-zone 2` launch argument
+        if launchZone > 0 { zoneID = launchZone }
     }
 
     var zone: Zone { state.zone(zoneID) ?? Zone(id: zoneID, name: "Main") }
@@ -116,7 +118,8 @@ final class ReceiverStore {
     }
 
     /// Slider drags are throttled to ~10 commands/s; the final value is always sent.
-    func setVolume(_ v: Double, final: Bool = false) {
+    func setVolume(_ raw: Double, final: Bool = false) {
+        let v = zone.halfStep ? (raw * 2).rounded() / 2 : raw.rounded()
         state.update(zone: zoneID) { $0.volume = v }
         if Int(v) != lastWholeVolume { lastWholeVolume = Int(v); Haptics.tick() }
         guard final || Date().timeIntervalSince(lastVolumeSend) > 0.1 else { return }
