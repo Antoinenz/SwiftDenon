@@ -24,13 +24,12 @@ struct InputPicker: View {
                 Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 13)
-            .contentShape(.capsule)
+            .padding(.vertical, 8)
         }
         .menuStyle(.button)
         .menuIndicator(.hidden)
-        .buttonStyle(.plain)
-        .glassEffect(.regular.interactive(), in: .capsule)
+        .buttonStyle(.glass)
+        .buttonBorderShape(.capsule)
         .animation(.snappy, value: name)
     }
 }

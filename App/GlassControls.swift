@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Round glass button; tinted when `active`.
+/// Round native glass button (hover, press and focus handled by the system); prominent + tinted when `active`.
 struct GlassCircleButton: View {
     let symbol: String
     var active = false
@@ -9,14 +9,18 @@ struct GlassCircleButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        let button = Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: size * 0.38, weight: .medium))
                 .frame(width: size, height: size)
-                .contentShape(.circle)
+                .foregroundStyle(active ? Color.white : Color.primary)
         }
-        .buttonStyle(.plain)
-        .glassEffect(active ? .regular.tint(tint.opacity(0.55)).interactive() : .regular.interactive(), in: .circle)
+        .buttonBorderShape(.circle)
+        if active {
+            button.buttonStyle(.glassProminent).tint(tint.opacity(0.65))
+        } else {
+            button.buttonStyle(.glass)
+        }
     }
 }
 
