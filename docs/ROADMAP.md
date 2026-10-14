@@ -1,6 +1,7 @@
 # Roadmap and known gaps
 
-- Verify the iOS layout (the app builds for iOS but the UI was designed and screenshot-tested on macOS).
+- iOS: the build currently fails (`RemoteView` uses the macOS-only `.window` container background and `.windowToolbar` placement without an `#if os(macOS)` guard). After that, the layout needs a real pass on iPhone; it was designed and screenshot-tested on macOS only.
+- An intermittent self-mute while dragging the volume slider was reported once and couldn't be reproduced; the wire log is in place to catch it.
 - Control Center / widget controls (App Intents exist for Shortcuts only).
 - HTTP fallback for receivers without telnet control.
 - Zone names from the amp if a readable endpoint is found (currently local names).

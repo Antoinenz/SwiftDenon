@@ -114,6 +114,46 @@ User: *"the mute button ... has no animations at all. the button and its icon ne
 
 User: *"push to github ... add documentation ... add all of our chat history and details into doc files that are not gitignored"* — this documentation set was added and the repository pushed. Licence and repository name are to be decided later.
 
+## 16. iOS status and scheme
+
+User: *"pull latest changes, and let me know where we're at for the ios app"*
+
+- Only the user's MIT `LICENSE` came in.
+- `xcodegen` stopped generating the scheme, so it is now declared in `project.yml`.
+- The iOS build fails on two macOS-only modifiers in `RemoteView`; the iPhone layout has never been checked. Left for later, Mac first.
+
+## 17. Self-mute while sliding
+
+User: *"looks like theres a bug where when im using the volume slider it mutes by itself"*
+
+- No code path sends a mute from the slider; mute comes only from the button and the Space key.
+- Added wire logging (`os.Logger`, `TX`/`RX` lines) to catch it. The user then reported it had stopped; not reproduced.
+
+## 18. Settings pages and demo mode
+
+User: *"seperate the settings tab into sections, like one for zones, one for the amp, and the last general app settings"*, then *"add a button in the app settings to toggle demo mode"*
+
+- Settings got Amp / Zones / General pages behind a segmented switcher. The switcher sits above the form because a sheet's principal toolbar item isn't shown on macOS, and inside the form it rendered as a narrow card.
+- `DemoReceiver` (in-memory) and a Demo mode toggle under General. The saved host is left alone.
+
+## 19. Gear position
+
+User: *"the settings icon moves to the left when disconnected. make sure it stays on the right side"*
+
+- With no zone picker the principal toolbar slot was empty and the gear slid left. It now holds a clear spacer with its glass background hidden (otherwise a blank pill appeared).
+
+## 20. App icon
+
+User: *"design an icon"*, then *"not a massive fan, it needs to fit the apple icon design. also please build the icon composer for me to open"*
+
+- First attempt: flat SVGs of a dial arc. Rejected.
+- Second: an Icon Composer document (`App/AppIcon.icon`): white glass knob with a blue indicator, eleven scale dots lit up to it, blue gradient; three groups for Liquid Glass depth. Previewed with `ictool` in light and dark. Approved: *"ah very nice. i like that. add it to the app"*.
+- Added to the target. The Dock still showed the old icon until the icon cache was refreshed (`lsregister -f`, restart Dock).
+
+## 21. README
+
+User: *"rewrite the readme to follow this template"* (the user's Claudeometer and battery-tray READMEs): centred logo, title and tagline, features, installation, usage, how it works, development, screenshots, licence.
+
 ---
 
 ## Testing notes that shaped the work
@@ -124,4 +164,4 @@ User: *"push to github ... add documentation ... add all of our chat history and
 
 ## Open items
 
-See ROADMAP.md. Notably: iOS layout is unverified, zone names can't be read from the amp, and only Denon/Marantz is implemented.
+See ROADMAP.md. Notably: the iOS build is broken and its layout unverified, zone names can't be read from the amp, and only Denon/Marantz is implemented.
