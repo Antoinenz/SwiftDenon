@@ -17,7 +17,7 @@ struct InputPicker: View {
                 Text(name).font(.headline).lineLimit(1)
                     .id(name)
                     .transition(.blurReplace)
-                Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.semibold)).foregroundStyle(Color.primary.opacity(0.55))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
@@ -34,8 +34,8 @@ struct InputPicker: View {
                     }
                 }
             }
-            .padding(6)
-            .frame(minWidth: 210)
+            .padding(8)
+            .frame(minWidth: 220)
         }
     }
 }
@@ -53,11 +53,11 @@ private struct InputRow: View {
                 Spacer(minLength: 16)
                 if selected { Image(systemName: "checkmark").font(.caption.weight(.semibold)) }
             }
-            .padding(.horizontal, 10).padding(.vertical, 6)
+            .padding(.horizontal, 14).padding(.vertical, 7)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .background(hovering ? AnyShapeStyle(.quaternary) : AnyShapeStyle(.clear), in: .rect(cornerRadius: 8))
+        .background(hovering ? AnyShapeStyle(Color.primary.opacity(0.12)) : AnyShapeStyle(.clear), in: .capsule)
         .onHover { hovering = $0 }
     }
 }
