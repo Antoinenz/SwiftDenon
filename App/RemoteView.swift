@@ -6,7 +6,7 @@ struct RemoteView: View {
     @State private var showSettings = false
 
     private let playingHeight: CGFloat = 374
-    private let idleHeight: CGFloat = 188
+    private let idleHeight: CGFloat = 226
 
     var body: some View {
         let zone = store.zone
@@ -56,8 +56,10 @@ struct RemoteView: View {
     private func standby(_ zone: Zone) -> some View {
         VStack(spacing: 20) {
             GlassCircleButton(symbol: "power", size: 96) { store.setPower(true) }
+                .padding(.top, 22)
             Text(store.state.zones.count > 1 ? zone.name : store.displayName)
                 .font(.callout).foregroundStyle(.secondary)
+                .padding(.bottom, 10)
         }
         .frame(maxWidth: .infinity, minHeight: 180)
     }
