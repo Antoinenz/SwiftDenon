@@ -25,7 +25,7 @@ It finds your receiver on the network by itself and keeps a live connection to i
 - **Instant feedback**: controls react immediately and reconcile with the amp, so nothing jumps back while the receiver catches up
 - **Smooth volume**: a glass slider that follows your pointer, with optional 0.5 dB half steps on zones that support them
 - **Sound settings**: sound mode, dynamic EQ, bass, treble and subwoofer faders, sleep timer
-- **Menu bar controller**: power, volume, mute and input from the menu bar
+- **Menu bar controller**: zones, power, volume, mute and input from the menu bar, with an icon that shows whether the zone is on or muted
 - **Shortcuts**: power, volume, mute and input actions
 - **Demo mode**: try everything against a simulated receiver, no amp needed
 - **Minimal footprint**: native SwiftUI, one small window, no third-party code
@@ -57,14 +57,16 @@ Developed and tested against a Denon AVR-X2700H. Other Denon and Marantz receive
 | **P** | Turn the zone on or off |
 | **1 / 2 / 3** | Switch to Main, Zone 2 or Zone 3 |
 | **Tab** | Next zone |
-
-Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number.
 | **Drag** the slider | Set the volume. Fast drags skip half steps |
 | **Click** the zone picker | Switch between zones |
 | **Click** the input name | Pick an input |
 | **Click** the gear | Settings: Amp, Zones and General |
 
-The menu bar icon opens a compact controller for the selected zone. Zone names live in the app, because receivers don't expose them over the network. Set them under **Settings → Zones**.
+Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number.
+
+The menu bar icon opens a compact controller with the same controls: zone switcher, volume, mute, power and input, plus ↑/↓, Space, P and Tab. The icon is filled while the zone is playing, outlined when it's off and crossed out when muted. **Open SwiftDenon** brings the window back if you closed it, and **Settings → General → Show in menu bar** hides it.
+
+Zone names live in the app, because receivers don't expose them over the network. Set them under **Settings → Zones**.
 
 ## How it talks to your receiver
 
