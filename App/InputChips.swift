@@ -1,28 +1,33 @@
 import SwiftUI
 import ReceiverKit
 
-struct InputChips: View {
+/// Current input as a glass pill; tap to pick another from the receiver's enabled inputs.
+struct InputPicker: View {
     @Environment(ReceiverStore.self) private var store
 
     var body: some View {
+        let inputs = store.state.inputs
         let current = store.zone.input
-        GlassEffectContainer(spacing: 8) {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 8)], spacing: 8) {
-                ForEach(store.state.inputs) { input in
-                    let selected = input.id == current
-                    Button { Haptics.tap(); store.setInput(input.id) } label: {
-                        Text(input.name)
-                            .font(.subheadline.weight(selected ? .semibold : .regular))
-                            .lineLimit(1)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 9)
-                            .contentShape(.capsule)
-                    }
-                    .buttonStyle(.plain)
-                    .glassEffect(selected ? .regular.tint(.accentColor.opacity(0.55)).interactive() : .regular.interactive(),
-                                 in: .capsule)
+        let name = inputs.first { $0.id == current }?.name ?? current.map(DenonProtocol.defaultName(for:)) ?? "Input"
+
+        Menu {
+            ForEach(inputs) { input in
+                Button { Haptics.tap(); store.setInput(input.id) } label: {
+                    if input.id == current { Label(input.name, systemImage: "checkmark") } else { Text(input.name) }
                 }
             }
+        } label: {
+            HStack(spacing: 8) {
+                Text(name).font(.headline).lineLimit(1)
+                Image(systemName: "chevron.up.chevron.down").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 13)
+            .contentShape(.capsule)
         }
+        .menuStyle(.button)
+        .menuIndicator(.hidden)
+        .buttonStyle(.plain)
+        .glassEffect(.regular.interactive(), in: .capsule)
     }
 }
