@@ -28,7 +28,7 @@ struct MenuBarView: View {
                 onEditingChanged: { if !$0 { store.setVolume(zone.volume, final: true) } }
             )
             Picker("Input", selection: Binding(get: { zone.input ?? "" }, set: { store.setInput($0) })) {
-                ForEach(store.inputs) { Text($0.name).tag($0.id) }
+                ForEach(store.state.inputs) { Text($0.name).tag($0.id) }
             }
             .labelsHidden()
         }

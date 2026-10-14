@@ -8,9 +8,9 @@ struct InputChips: View {
         let current = store.zone.input
         GlassEffectContainer(spacing: 8) {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 104), spacing: 8)], spacing: 8) {
-                ForEach(store.inputs) { input in
+                ForEach(store.state.inputs) { input in
                     let selected = input.id == current
-                    Button { store.setInput(input.id) } label: {
+                    Button { Haptics.tap(); store.setInput(input.id) } label: {
                         Text(input.name)
                             .font(.subheadline.weight(selected ? .semibold : .regular))
                             .lineLimit(1)
