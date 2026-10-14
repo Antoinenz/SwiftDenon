@@ -47,8 +47,9 @@ struct RemoteView: View {
                 if store.state.zones.count > 1 { ZonePicker() }
             }
             ToolbarItem(placement: .primaryAction) {
-                Button("Settings", systemImage: "gearshape") { showSettings = true }
+                GlassCircleButton(symbol: "gearshape", size: 12, iconSize: 15) { showSettings = true }
             }
+            .sharedBackgroundVisibility(.hidden)
         }
         .focusable()
         .focusEffectDisabled()
@@ -93,17 +94,20 @@ struct RemoteView: View {
                 .contentTransition(.numericText(value: zone.volume))
                 .animation(.snappy(duration: 0.25), value: zone.volume)
                 .opacity(zone.mute ? 0.3 : 1)
+                .animation(.smooth(duration: 0.3), value: zone.mute)
                 .padding(.top, 22)
                 .padding(.bottom, 10)
             HStack(spacing: 12) {
                 GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
                 GlassSlider(
                     value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
-                    range: 0...zone.maxVolume, dimmed: zone.mute, halfStep: store.useHalfSteps,
+                    range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
                     onEnd: { store.setVolume(zone.volume, final: true) }
                 )
                 GlassCircleButton(symbol: "plus", size: 40) { step(1) }
             }
+            .opacity(zone.mute ? 0.35 : 1)
+            .animation(.smooth(duration: 0.3), value: zone.mute)
             GlassEffectContainer(spacing: 16) {
                 HStack(spacing: 16) {
                     GlassCircleButton(symbol: "power", active: true, tint: .green) { store.setPower(false) }
