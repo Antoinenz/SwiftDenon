@@ -13,19 +13,25 @@ struct RemoteView: View {
         let zone = store.zone
         let isPlaying = store.state.connected && zonePower(zone)
 
-        Group {
-            if !store.state.connected {
-                connecting
-            } else if !zonePower(zone) {
-                standby(zone)
-            } else {
-                playing(zone)
+        // The content is an overlay so it never imposes a minimum window height;
+        // WindowHeightAnimator owns the window height and animates it both ways.
+        Color.clear
+            .frame(width: 380)
+            .frame(minHeight: 100, maxHeight: .infinity)
+            .overlay(alignment: .top) {
+                Group {
+                    if !store.state.connected {
+                        connecting
+                    } else if !zonePower(zone) {
+                        standby(zone)
+                    } else {
+                        playing(zone)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .frame(width: 380)
+                .animation(.smooth(duration: 0.35), value: isPlaying)
             }
-        }
-        .padding(.horizontal, 24)
-        .frame(width: 380, alignment: .top)
-        .frame(maxHeight: .infinity, alignment: .top)
-        .animation(.smooth(duration: 0.35), value: isPlaying)
         #if os(macOS)
         .background(WindowHeightAnimator(height: contentHeight))
         #endif
@@ -72,7 +78,7 @@ struct RemoteView: View {
 
     private func playing(_ zone: Zone) -> some View {
         VStack(spacing: 26) {
-            Text(zone.volume.formatted(.number.precision(.fractionLength(0...1))))
+            Text(zone.volume.formatted(.number.precision(store.useHalfSteps ? .fractionLength(1) : .fractionLength(0...1))))
                 .font(.system(size: 84, weight: .semibold, design: .rounded))
                 .monospacedDigit()
                 .contentTransition(.numericText(value: zone.volume))
