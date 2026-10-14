@@ -11,7 +11,7 @@ struct SwiftDenonApp: App {
                 .task { store.start() }
         }
         #if os(macOS)
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
         #endif
 
         #if os(macOS)
