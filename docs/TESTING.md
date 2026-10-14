@@ -43,6 +43,7 @@ Pass with `open build/Build/Products/Debug/SwiftDenon.app --args -zone 2`.
 
 - Find the app's window id with `CGWindowListCopyWindowInfo` and capture with `screencapture -x -o -l <id> out.png`.
 - Animation checks: poll the window bounds at ~8 ms from another process and print height changes (showed that growing jumped while shrinking animated), or capture a burst of frames and compare luminance regions (used to confirm the mute fade and that label text never goes darker than the background during a transition).
+- Menu bar panel: it only opens for a real click, not an Accessibility `click`, so post a `CGEvent` mouse down/up on the item's position (`get position of menu bar item 1 of menu bar 2`). The panel is the app's window at layer 101.
 - Stale window frames: SwiftUI stores a frame per scene type in the app's defaults (`NSWindow Frame …`); delete those keys to test a fresh launch.
 
 ## App icon previews
@@ -67,4 +68,5 @@ Use `--rendition Dark` for dark mode.
 - Hide volume slider on: − number + in one row, all fade when muted.
 - Keyboard: ←/→ cycle inputs (wrapping, ignored when the zone is off), P toggles power, M/Space mute, 1/2/3 and Tab switch zones.
 - Disconnected or single zone: gear stays top right, no empty glass pill.
+- Menu bar: zone switcher, volume, mute, power and input all mirror the window; standby shows one power button; icon filled/outlined/crossed out; *Open SwiftDenon* reopens a closed window; *Show in menu bar* off removes it.
 - Settings: Amp / Zones / General pages switch; demo mode toggles without touching the saved host.

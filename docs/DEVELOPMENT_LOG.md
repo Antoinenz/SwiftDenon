@@ -178,6 +178,19 @@ User: *"top bar doesnt have background. switcher still isnt liquid glass support
 - `safeAreaBar` + hard scroll-edge effect gives it a toolbar backdrop.
 - One row like the main window: switcher centred, round glass-prominent checkmark on the right (the title was dropped, as in the main window). The switcher's selection is now a sliding glass lens.
 
+## 25. Menu bar
+
+User: *"okay can you take care of the menu bar"*
+
+The menu bar panel was still the first draft: a system slider with tick marks (from `step: 0.5`), plain buttons, no zones, nothing for standby or disconnected.
+
+- Rebuilt from the window's glass controls: glass zone switcher, volume number with mute and power, `−` slider `+`, input pill, footer with *Open SwiftDenon* and *Quit*. Connecting and standby states like the window.
+- The icon reflects the selected zone: filled playing, outlined off, crossed out muted.
+- *Hide volume slider* is honoured. The first try put `−` number `+` and the two buttons in one row and it overflowed the panel; mute and power now get their own row in that mode.
+- *Settings → General → Show in menu bar*.
+- `stepVolume(by:)` moved into the store and `GlassSegmented` into `GlassControls.swift`, both now shared.
+- Checked in demo mode; the hidden-slider layout via `-hideVolumeSlider YES` so the saved setting wasn't touched.
+
 ---
 
 ## Testing notes that shaped the work

@@ -12,6 +12,7 @@
 - Frosted window (`containerBackground(.ultraThinMaterial, for: .window)`), 380 pt wide, native toolbar with the zone selector (segmented control, centred with the traffic lights) and a glass gear button at the trailing edge.
 - Playing: large rounded volume number, `−` slider `+`, power and mute glass buttons, and the current input as a glass pill that opens a popover list of the receiver's enabled inputs.
 - Standby: large power button and zone name, with equal 40 pt gaps above and below.
+- Menu bar: a 300 pt panel with the same glass controls. Glass zone switcher on top, then the volume number with mute and power beside it, the `−` slider `+` row, the input pill, and a quiet footer with *Open SwiftDenon* and *Quit*. With the slider hidden, `−` number `+` is centred and mute and power get their own row, because glass buttons draw larger than their frames and the single row overflowed.
 
 ## Decisions and why
 
@@ -25,6 +26,7 @@
 - **Zone names cap at 12 characters** so the segmented control fits the toolbar between the traffic lights and the gear; longer names collapsed the toolbar into an overflow menu.
 - **Window height is animated manually**, both directions, because SwiftUI/AppKit resizing jumped (see ARCHITECTURE.md).
 - **No manual IP by default.** The app scans the subnet and connects. A manual address (optionally `host:port`) remains in Settings for odd networks.
+- **The menu bar icon carries state.** Filled when the selected zone is playing, outlined when it's off or disconnected, crossed out when muted, so a glance at the menu bar answers "is it on?".
 - **EQ as faders.** The amp only exposes bass, treble and sub, so those are drawn as three vertical glass faders rather than a pretend multi-band EQ.
 
 ## Reference apps
