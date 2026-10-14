@@ -1,26 +1,28 @@
 import SwiftUI
 
-/// Round native glass button (hover, press and focus handled by the system); prominent + tinted when `active`.
+/// Round native glass button (hover, press and focus handled by the system). One button style
+/// throughout so state changes animate: the tint fades in and the icon swaps with a symbol effect.
 struct GlassCircleButton: View {
     let symbol: String
     var active = false
     var tint: Color = .accentColor
     var size: CGFloat = 52
+    var iconSize: CGFloat?
     let action: () -> Void
 
     var body: some View {
-        let button = Button(action: action) {
+        Button(action: action) {
             Image(systemName: symbol)
-                .font(.system(size: size * 0.38, weight: .medium))
+                .font(.system(size: iconSize ?? size * 0.38, weight: .medium))
+                .contentTransition(.symbolEffect(.replace))
                 .frame(width: size, height: size)
                 .foregroundStyle(active ? Color.white : Color.primary)
         }
         .buttonBorderShape(.circle)
-        if active {
-            button.buttonStyle(.glassProminent).tint(tint.opacity(0.65))
-        } else {
-            button.buttonStyle(.glass)
-        }
+        .buttonStyle(.glass)
+        .tint(active ? tint.opacity(0.7) : nil)
+        .animation(.snappy, value: active)
+        .animation(.snappy, value: symbol)
     }
 }
 
