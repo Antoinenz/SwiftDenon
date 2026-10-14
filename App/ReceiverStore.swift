@@ -16,7 +16,6 @@ final class ReceiverStore {
     private var listener: Task<Void, Never>?
     private var connector: Task<Void, Never>?
     private var lastVolumeSend = Date.distantPast
-    private var lastWholeVolume = -1
 
     init() {
         host = UserDefaults.standard.string(forKey: "host") ?? ""
@@ -26,6 +25,8 @@ final class ReceiverStore {
     }
 
     var zone: Zone { state.zone(zoneID) ?? Zone(id: zoneID, name: "Main") }
+    /// 0.5 steps are opt-in, and only for zones the receiver reports them for.
+    var useHalfSteps: Bool { zone.halfStep && UserDefaults.standard.bool(forKey: "halfStepVolume") }
     var displayName: String { state.friendlyName ?? receiverName ?? "Receiver" }
 
     // MARK: Connection
@@ -119,9 +120,8 @@ final class ReceiverStore {
 
     /// Slider drags are throttled to ~10 commands/s; the final value is always sent.
     func setVolume(_ raw: Double, final: Bool = false) {
-        let v = zone.halfStep ? (raw * 2).rounded() / 2 : raw.rounded()
+        let v = useHalfSteps ? (raw * 2).rounded() / 2 : raw.rounded()
         state.update(zone: zoneID) { $0.volume = v }
-        if Int(v) != lastWholeVolume { lastWholeVolume = Int(v); Haptics.tick() }
         guard final || Date().timeIntervalSince(lastVolumeSend) > 0.1 else { return }
         lastVolumeSend = Date()
         send(.volume(zone: zoneID, v))

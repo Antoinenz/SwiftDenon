@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @State private var manualHost = ""
+    @AppStorage("halfStepVolume") private var halfStepVolume = false
 
     var body: some View {
         let s = store.state
@@ -17,6 +18,9 @@ struct SettingsView: View {
                         Picker("Mode", selection: Binding(get: { s.soundMode ?? "" }, set: { store.send(.soundMode($0)) })) {
                             if let m = s.soundMode, !DenonProtocol.soundModes.contains(m) { Text(m.capitalized).tag(m) }
                             ForEach(DenonProtocol.soundModes, id: \.self) { Text($0.capitalized).tag($0) }
+                        }
+                        if s.zone(1)?.halfStep == true || s.zones.contains(where: \.halfStep) {
+                            Toggle("Half-step volume", isOn: $halfStepVolume)
                         }
                         if let v = s.dynamicEQ {
                             Toggle("Dynamic EQ", isOn: Binding(get: { v }, set: { store.send(.dynamicEQ($0)) }))
