@@ -8,6 +8,8 @@ struct SettingsView: View {
     @Environment(\.openURL) private var openURL
     @State private var manualHost = ""
     @AppStorage("halfStepVolume") private var halfStepVolume = false
+    @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
+    @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
 
     private enum Page: String, CaseIterable, Identifiable {
         case amp = "Amp", zones = "Zones", general = "General"
@@ -16,30 +18,35 @@ struct SettingsView: View {
     @State private var page = Page.amp
 
     var body: some View {
-        NavigationStack {
-            Form {
-                switch page {
-                case .amp: ampPage
-                case .zones: zonesPage
-                case .general: generalPage
-                }
-            }
-            .formStyle(.grouped)
-            .safeAreaInset(edge: .top, spacing: 0) {
-                Picker("Page", selection: $page) {
-                    ForEach(Page.allCases) { Text($0.rawValue).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .padding(.horizontal, 20)
-                .padding(.vertical, 10)
-            }
-            .navigationTitle("Settings")
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
+        Form {
+            switch page {
+            case .amp: ampPage
+            case .zones: zonesPage
+            case .general: generalPage
             }
         }
+        .formStyle(.grouped)
+        .safeAreaInset(edge: .top, spacing: 0) { header }
         .frame(minWidth: 380, minHeight: 460)
+    }
+
+    /// Title, Done and the page switcher. Built by hand: a sheet's navigation title is inset
+    /// on macOS and its principal toolbar item isn't shown.
+    private var header: some View {
+        VStack(spacing: 12) {
+            HStack {
+                Text("Settings").font(.title2.weight(.semibold))
+                Spacer()
+                Button("Done") { dismiss() }
+                    .buttonStyle(.glassProminent)
+                    .keyboardShortcut(.defaultAction)
+            }
+            GlassSegmented(selection: $page, options: Page.allCases) { Text($0.rawValue) }
+        }
+        .padding(.leading, 30)       // lines the title up with the section headers
+        .padding(.trailing, 20)
+        .padding(.top, 18)
+        .padding(.bottom, 6)
     }
 
     @ViewBuilder private var ampPage: some View {
@@ -89,6 +96,16 @@ struct SettingsView: View {
         Section("Volume") {
             Toggle("Half-step volume", isOn: $halfStepVolume)
                 .disabled(!s.zones.contains(where: \.halfStep))
+            Toggle("Hide volume slider", isOn: $hideVolumeSlider)
+        }
+        Section {
+            Toggle("Arrow keys switch zones", isOn: $arrowKeysSwitchZones)
+        } header: {
+            Text("Keyboard")
+        } footer: {
+            Text(arrowKeysSwitchZones
+                 ? "← → switch zones, Tab steps through inputs."
+                 : "← → step through inputs, Tab switches zones.")
         }
         Section {
             Toggle("Demo mode", isOn: Binding(get: { store.demoMode }, set: { store.setDemoMode($0) }))
@@ -146,6 +163,39 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+}
+
+/// A segmented control drawn as one glass capsule with a sliding selection,
+/// matching the zone picker in the main window's toolbar.
+struct GlassSegmented<Option: Hashable, Label: View>: View {
+    @Binding var selection: Option
+    let options: [Option]
+    @ViewBuilder let label: (Option) -> Label
+    @Namespace private var ns
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(options, id: \.self) { option in
+                Button { withAnimation(.snappy(duration: 0.3)) { selection = option } } label: {
+                    label(option)
+                        .font(.body.weight(.medium))
+                        .foregroundStyle(selection == option ? .primary : .secondary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                        .background {
+                            if selection == option {
+                                Capsule().fill(.primary.opacity(0.14))
+                                    .matchedGeometryEffect(id: "selection", in: ns)
+                            }
+                        }
+                        .contentShape(.capsule)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(4)
+        .glassEffect(.regular.interactive(), in: .capsule)
     }
 }
 
