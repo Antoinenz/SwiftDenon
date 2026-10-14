@@ -44,7 +44,9 @@ public enum DenonProtocol {
     public static func encode(_ command: Command) -> [String] {
         switch command {
         case let .power(zone, on):
-            if zone == 1 { return [on ? "PWON" : "PWSTANDBY"] }
+            // PWSTANDBY would switch off every zone; ZMOFF only the main zone.
+            // PWON wakes the unit from full standby, ZMON then enables the main zone.
+            if zone == 1 { return on ? ["PWON", "ZMON"] : ["ZMOFF"] }
             return ["Z\(zone)" + (on ? "ON" : "OFF")]
         case let .volume(zone, v):
             return [(prefix(zone) ?? "MV") + formatVolume(v)]
@@ -78,8 +80,10 @@ public enum DenonProtocol {
         let l = line.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if l.hasPrefix("PW") {
-            let on = l == "PWON"
-            if on || l == "PWSTANDBY" { state.update(zone: 1) { $0.power = on } }
+            // PWON says nothing about individual zones (ZM/Z2/Z3 do); PWSTANDBY turns all of them off.
+            if l == "PWSTANDBY" {
+                for i in state.zones.indices { state.zones[i].power = false }
+            }
         } else if l == "ZMON" || l == "ZMOFF" {
             state.update(zone: 1) { $0.power = l == "ZMON" }
         } else if l.hasPrefix("MVMAX") {

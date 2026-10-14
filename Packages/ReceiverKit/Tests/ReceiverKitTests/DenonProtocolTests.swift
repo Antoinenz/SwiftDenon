@@ -16,7 +16,8 @@ import Testing
     }
 
     @Test func encoding() {
-        #expect(DenonProtocol.encode(.power(zone: 1, on: false)) == ["PWSTANDBY"])
+        #expect(DenonProtocol.encode(.power(zone: 1, on: false)) == ["ZMOFF"])
+        #expect(DenonProtocol.encode(.power(zone: 1, on: true)) == ["PWON", "ZMON"])
         #expect(DenonProtocol.encode(.power(zone: 2, on: true)) == ["Z2ON"])
         #expect(DenonProtocol.encode(.volume(zone: 1, 40.5)) == ["MV405"])
         #expect(DenonProtocol.encode(.volume(zone: 2, 30)) == ["Z230"])
@@ -30,7 +31,7 @@ import Testing
 
     @Test func decodeMainZone() {
         var s = ReceiverState()
-        DenonProtocol.apply("PWON", to: &s)
+        DenonProtocol.apply("ZMON", to: &s)
         DenonProtocol.apply("MV435", to: &s)
         DenonProtocol.apply("MVMAX 98", to: &s)
         DenonProtocol.apply("MUON", to: &s)
@@ -90,5 +91,14 @@ import Testing
         DenonProtocol.apply("Z2AUX1", to: &s)
         DenonProtocol.apply("Z2SLPOFF", to: &s)
         #expect(s.zone(2)?.input == "AUX1")
+    }
+
+    @Test func zonesArePoweredIndependently() {
+        var s = ReceiverState()
+        for l in ["PWON", "ZMOFF", "Z2ON"] { DenonProtocol.apply(l, to: &s) }
+        #expect(s.zone(1)?.power == false)
+        #expect(s.zone(2)?.power == true)
+        DenonProtocol.apply("PWSTANDBY", to: &s)
+        #expect(s.zone(2)?.power == false)
     }
 }

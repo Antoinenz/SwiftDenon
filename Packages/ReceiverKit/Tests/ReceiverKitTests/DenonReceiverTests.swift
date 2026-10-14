@@ -13,7 +13,7 @@ final class MockAVR: @unchecked Sendable {
     func start() async -> UInt16 {
         listener.newConnectionHandler = { [self] c in
             c.start(queue: .global())
-            c.send(content: Data("PWON\rMV435\rSIBD\r".utf8), completion: .idempotent)
+            c.send(content: Data("ZMON\rMV435\rSIBD\r".utf8), completion: .idempotent)
             func loop() {
                 c.receive(minimumIncompleteLength: 1, maximumLength: 1024) { d, _, done, e in
                     if let d { self.lock.withLock { self._received += String(decoding: d, as: UTF8.self) } }
