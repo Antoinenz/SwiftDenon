@@ -60,25 +60,30 @@ struct RemoteView: View {
     }
 
     private func playing(_ zone: Zone) -> some View {
-        VStack(spacing: 28) {
+        VStack(spacing: 26) {
             Text(zone.volume.formatted(.number.precision(.fractionLength(0...1))))
                 .font(.system(size: 84, weight: .semibold, design: .rounded))
                 .monospacedDigit()
                 .contentTransition(.numericText(value: zone.volume))
+                .animation(.snappy(duration: 0.25), value: zone.volume)
                 .opacity(zone.mute ? 0.3 : 1)
-            GlassSlider(
-                value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
-                range: 0...zone.maxVolume, dimmed: zone.mute,
-                onEnd: { store.setVolume(zone.volume, final: true) }
-            )
-            InputChips()
-            GlassEffectContainer(spacing: 14) {
-                HStack(spacing: 14) {
+            HStack(spacing: 12) {
+                GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
+                GlassSlider(
+                    value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
+                    range: 0...zone.maxVolume, dimmed: zone.mute, halfStep: zone.halfStep,
+                    onEnd: { store.setVolume(zone.volume, final: true) }
+                )
+                GlassCircleButton(symbol: "plus", size: 40) { step(1) }
+            }
+            GlassEffectContainer(spacing: 16) {
+                HStack(spacing: 16) {
+                    GlassCircleButton(symbol: "power", active: true, tint: .green) { store.setPower(false) }
                     GlassCircleButton(symbol: zone.mute ? "speaker.slash.fill" : "speaker.wave.2.fill",
-                                      active: zone.mute, tint: .orange, size: 44) { store.toggleMute() }
-                    GlassCircleButton(symbol: "power", size: 44) { store.setPower(false) }
+                                      active: zone.mute, tint: .orange) { store.toggleMute() }
                 }
             }
+            InputPicker()
         }
         .transition(.opacity.combined(with: .scale(scale: 0.96)))
     }
