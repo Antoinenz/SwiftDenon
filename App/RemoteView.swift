@@ -5,7 +5,7 @@ struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
     @State private var showSettings = false
 
-    private let playingHeight: CGFloat = 334
+    private let playingHeight: CGFloat = 374
     private let idleHeight: CGFloat = 188
 
     var body: some View {
@@ -70,6 +70,8 @@ struct RemoteView: View {
                 .contentTransition(.numericText(value: zone.volume))
                 .animation(.snappy(duration: 0.25), value: zone.volume)
                 .opacity(zone.mute ? 0.3 : 1)
+                .padding(.top, 22)
+                .padding(.bottom, 10)
             HStack(spacing: 12) {
                 GlassCircleButton(symbol: "minus", size: 40) { step(-1) }
                 GlassSlider(
@@ -88,6 +90,7 @@ struct RemoteView: View {
             }
             InputPicker()
         }
+        .animation(.snappy, value: store.zoneID)
         .transition(.opacity.combined(with: .scale(scale: 0.96)))
     }
 
