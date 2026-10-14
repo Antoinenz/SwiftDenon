@@ -4,12 +4,17 @@ import Foundation
 public enum DenonProtocol {
     public static let port: UInt16 = 23
 
-    public static let inputs: [Input] = [
+    /// Used until the receiver reports its own source list.
+    public static let defaultSources: [Input] = [
         ("TV", "TV Audio"), ("SAT/CBL", "Cable / Sat"), ("DVD", "DVD"), ("BD", "Blu-ray"),
         ("GAME", "Game"), ("MPLAY", "Media Player"), ("AUX1", "Aux 1"), ("AUX2", "Aux 2"),
-        ("CD", "CD"), ("PHONO", "Phono"), ("TUNER", "Tuner"), ("NET", "HEOS / Network"),
+        ("CD", "CD"), ("PHONO", "Phono"), ("TUNER", "Tuner"), ("NET", "HEOS"),
         ("BT", "Bluetooth"), ("USB/IPOD", "USB"), ("8K", "8K"),
     ].map { Input(id: $0.0, name: $0.1) }
+
+    public static func defaultName(for code: String) -> String {
+        defaultSources.first { $0.id == code }?.name ?? code
+    }
 
     public static let soundModes = [
         "MOVIE", "MUSIC", "GAME", "DIRECT", "PURE DIRECT", "STEREO", "AUTO",
@@ -59,7 +64,8 @@ public enum DenonProtocol {
             return ["SLP" + String(format: "%03d", max(1, min(120, m)))]
         case .refresh:
             return ["PW?", "ZM?", "MV?", "MU?", "SI?", "MS?", "Z2?", "Z3?",
-                    "PSBAS ?", "PSTRE ?", "PSSWL ?", "PSDYNEQ ?", "SLP?"]
+                    "PSBAS ?", "PSTRE ?", "PSSWL ?", "PSDYNEQ ?", "SLP?",
+                    "SSFUN ?", "SSSOD ?", "NSFRN ?"]
         }
     }
 
@@ -84,6 +90,24 @@ public enum DenonProtocol {
             if let v = parseVolume(String(l.dropFirst(2))) { state.update(zone: 1) { $0.volume = v } }
         } else if l.hasPrefix("MU") {
             if l == "MUON" || l == "MUOFF" { state.update(zone: 1) { $0.mute = l == "MUON" } }
+        } else if l.hasPrefix("SSFUN") {
+            // "SSFUNMPLAY Apple TV"
+            let body = l.dropFirst(5)
+            if body.trimmingCharacters(in: .whitespaces) != "END",
+               let sp = body.firstIndex(of: " ") {
+                let name = body[sp...].trimmingCharacters(in: .whitespaces)
+                if !name.isEmpty { state.sourceNames[String(body[..<sp])] = name }
+            }
+        } else if l.hasPrefix("SSSOD") {
+            // "SSSODBD DEL" = hidden on the receiver
+            let parts = l.dropFirst(5).split(separator: " ")
+            if parts.count == 2 {
+                let code = String(parts[0])
+                if !state.sourceOrder.contains(code) { state.sourceOrder.append(code) }
+                if parts[1] == "DEL" { state.hiddenSources.insert(code) } else { state.hiddenSources.remove(code) }
+            }
+        } else if l.hasPrefix("NSFRN ") {
+            state.friendlyName = String(l.dropFirst(6)).trimmingCharacters(in: .whitespaces)
         } else if l.hasPrefix("SI") {
             state.update(zone: 1) { $0.input = String(l.dropFirst(2)) }
         } else if l.hasPrefix("MS") {

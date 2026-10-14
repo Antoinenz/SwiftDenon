@@ -4,7 +4,6 @@ import Network
 /// Denon/Marantz receiver over the telnet-style control port.
 /// The receiver pushes status lines, so state is live without polling.
 public actor DenonReceiver: Receiver {
-    public nonisolated let inputs = DenonProtocol.inputs
     public nonisolated let soundModes = DenonProtocol.soundModes
     public nonisolated let states: AsyncStream<ReceiverState>
 

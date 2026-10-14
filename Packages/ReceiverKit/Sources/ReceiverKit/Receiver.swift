@@ -1,5 +1,4 @@
 public protocol Receiver: Sendable {
-    var inputs: [Input] { get }
     var soundModes: [String] { get }
     func connect() async throws
     func disconnect() async

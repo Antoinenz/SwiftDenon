@@ -65,4 +65,14 @@ import Testing
         #expect(!DenonProtocol.apply("PSMULTEQ:AUDYSSEY", to: &s))
         #expect(!DenonProtocol.apply("Z2PSBAS 50", to: &s))
     }
+
+    @Test func friendlyNamesAndHiddenSources() {
+        var s = ReceiverState()
+        for line in ["SSFUNMPLAY Apple TV        ", "SSFUNAUX1 Pool Room", "SSFUN END",
+                     "SSSODBD DEL", "SSSODMPLAY USE", "SSSODAUX1 USE", "SSSODTUNER USE", "SSSOD END"] {
+            DenonProtocol.apply(line, to: &s)
+        }
+        #expect(s.inputs.map(\.id) == ["MPLAY", "AUX1", "TUNER"])
+        #expect(s.inputs.map(\.name) == ["Apple TV", "Pool Room", "Tuner"])
+    }
 }
