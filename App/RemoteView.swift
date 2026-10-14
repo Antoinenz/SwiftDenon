@@ -4,14 +4,18 @@ import ReceiverKit
 struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
     @State private var showSettings = false
-    /// Natural height of whichever state view is showing; drives the window height.
-    @State private var contentHeight: CGFloat = 300
+    private enum Kind: Hashable { case connecting, standby, playing }
+    /// Natural height per state view. Each view only writes its own entry, so a view that is
+    /// fading out can't overwrite the height of the one fading in.
+    @State private var heights: [Kind: CGFloat] = [:]
+    private let defaultHeights: [Kind: CGFloat] = [.connecting: 200, .standby: 178, .playing: 380]
 
     private let edge: CGFloat = 24            // gap above and below standby content
 
     var body: some View {
         let zone = store.zone
         let isPlaying = store.state.connected && zonePower(zone)
+        let kind: Kind = !store.state.connected ? .connecting : (isPlaying ? .playing : .standby)
 
         // The content is an overlay so it never imposes a minimum window height;
         // WindowHeightAnimator owns the window height and animates it both ways.
@@ -33,7 +37,7 @@ struct RemoteView: View {
                 .animation(.smooth(duration: 0.35), value: isPlaying)
             }
         #if os(macOS)
-        .background(WindowHeightAnimator(height: contentHeight))
+        .background(WindowHeightAnimator(height: heights[kind] ?? defaultHeights[kind] ?? 300))
         #endif
         .containerBackground(.ultraThinMaterial, for: .window)
         .toolbar(removing: .title)
@@ -62,7 +66,7 @@ struct RemoteView: View {
         }
         .padding(.vertical, 48)
         .frame(maxWidth: .infinity)
-        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heights[.connecting] = $0 }
     }
 
     private func standby(_ zone: Zone) -> some View {
@@ -72,7 +76,7 @@ struct RemoteView: View {
                 .font(.callout).foregroundStyle(.secondary)
         }
         .padding(.vertical, edge)
-        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heights[.standby] = $0 }
         .transition(.opacity)
     }
 
@@ -105,7 +109,7 @@ struct RemoteView: View {
             InputPicker()
         }
         .padding(.bottom, 24)
-        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { contentHeight = $0 }
+        .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heights[.playing] = $0 }
         .animation(.snappy, value: store.zoneID)
         .transition(.opacity)
     }
