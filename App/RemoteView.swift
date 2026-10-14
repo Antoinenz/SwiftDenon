@@ -10,7 +10,7 @@ struct RemoteView: View {
     @State private var heights: [Kind: CGFloat] = [:]
     private let defaultHeights: [Kind: CGFloat] = [.connecting: 200, .standby: 178, .playing: 380]
 
-    private let edge: CGFloat = 24            // gap above and below standby content
+    private let edge: CGFloat = 40            // gap above and below standby content
 
     var body: some View {
         let zone = store.zone
@@ -72,10 +72,14 @@ struct RemoteView: View {
     private func standby(_ zone: Zone) -> some View {
         VStack(spacing: 16) {
             GlassCircleButton(symbol: "power", size: 96) { store.setPower(true) }
-            Text(store.state.zones.count > 1 ? store.name(of: zone) : store.displayName)
+            let label = store.state.zones.count > 1 ? store.name(of: zone) : store.displayName
+            Text(label)
                 .font(.callout).foregroundStyle(.secondary)
+                .id(label)
+                .transition(.blurReplace)
         }
         .padding(.vertical, edge)
+        .animation(.snappy, value: store.zoneID)
         .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { heights[.standby] = $0 }
         .transition(.opacity)
     }
