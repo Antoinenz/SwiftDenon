@@ -74,7 +74,8 @@ struct RemoteView: View {
             GlassCircleButton(symbol: "power", size: 96) { store.setPower(true) }
             let label = store.state.zones.count > 1 ? store.name(of: zone) : store.displayName
             Text(label)
-                .font(.callout).foregroundStyle(.secondary)
+                .font(.callout)
+                .foregroundStyle(Color.primary.opacity(0.55))   // not .secondary: vibrancy goes dark during the blur transition
                 .id(label)
                 .transition(.blurReplace)
         }
