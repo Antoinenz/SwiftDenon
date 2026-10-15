@@ -183,7 +183,10 @@ final class ReceiverStore {
         let z = zone
         guard state.connected, z.power else { return }
         let unit = useHalfSteps ? 0.5 : 1.0
-        setVolume(min(z.maxVolume, max(0, z.volume + steps * unit)), final: final)
+        let target = min(z.maxVolume, max(0, z.volume + steps * unit))
+        // A detent each time scrolling actually moves the volume (not at either end).
+        if target != z.volume { Haptics.tick() }
+        setVolume(target, final: final)
     }
 
     func togglePower() {
