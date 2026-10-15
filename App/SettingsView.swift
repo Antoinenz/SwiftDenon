@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("halfStepVolume") private var halfStepVolume = true
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     @AppStorage("scrollChangesVolume") private var scrollChangesVolume = false
+    @AppStorage("volumeButtons") private var volumeButtons = true
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
     @AppStorage("showInMenuBar") private var showInMenuBar = true
     @AppStorage("hideMenuBarWhenAway") private var hideMenuBarWhenAway = false
@@ -18,7 +19,11 @@ struct SettingsView: View {
         case amp = "Amp", zones = "Zones", general = "General"
         var id: Self { self }
     }
+    #if DEBUG
+    @State private var page = Page(rawValue: UserDefaults.standard.string(forKey: "debugPage") ?? "") ?? .amp   // `-debugPage General`
+    #else
     @State private var page = Page.amp
+    #endif
 
     var body: some View {
         #if os(macOS)
@@ -48,7 +53,11 @@ struct SettingsView: View {
         // Same window treatment as the remote, so the toolbar glass sits on the same material.
         .containerBackground(.ultraThinMaterial, for: .window)
         #endif
+        #if os(macOS)
         .toolbar(removing: .title)
+        #else
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Picker("Page", selection: $page) {
@@ -111,14 +120,19 @@ struct SettingsView: View {
             Toggle("Hide volume slider", isOn: $hideVolumeSlider)
             #if os(macOS)
             Toggle("Scroll to change volume", isOn: $scrollChangesVolume)
+            #else
+            Toggle("Use volume buttons", isOn: $volumeButtons)
             #endif
         } header: {
             Text("Volume")
         } footer: {
             #if os(macOS)
             Text("Scroll or swipe over the volume number or slider (the menu bar controller has the number only).")
+            #else
+            Text("While SwiftDenon is open and the receiver is on, your iPhone's volume buttons change the receiver's volume instead of the phone's. The phone's own volume is put back when you leave.")
             #endif
         }
+        #if os(macOS)
         Section {
             Toggle("Arrow keys switch zones", isOn: $arrowKeysSwitchZones)
         } header: {
@@ -128,7 +142,6 @@ struct SettingsView: View {
                  ? "← → switch zones, Tab steps through inputs."
                  : "← → step through inputs, Tab switches zones.")
         }
-        #if os(macOS)
         Section {
             Toggle("Show in menu bar", isOn: $showInMenuBar)
             Toggle("Hide when away from the receiver", isOn: $hideMenuBarWhenAway)
