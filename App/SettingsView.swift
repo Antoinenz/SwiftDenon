@@ -52,7 +52,7 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .frame(width: 240)
+                .frame(width: 220)
             }
         }
     }
@@ -150,10 +150,9 @@ struct SettingsView: View {
     }
 
     private var receiverSection: some View {
-        Section("Receiver") {
+        Section {
             if store.demoMode {
                 Label("Demo Receiver", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
-                Text("Demo mode is on. Turn it off in General to use a real receiver.").foregroundStyle(.secondary)
             } else if !store.host.isEmpty {
                 LabeledContent {
                     Text(store.host).foregroundStyle(.secondary)
@@ -191,6 +190,10 @@ struct SettingsView: View {
                     }
                 }
             }
+        } header: {
+            Text("Receiver")
+        } footer: {
+            if store.demoMode { Text("Demo mode is on. Turn it off in General to use a real receiver.") }
         }
     }
 }
