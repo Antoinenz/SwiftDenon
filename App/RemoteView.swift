@@ -168,13 +168,7 @@ struct RemoteView: View {
     }
 
     private func volumeNumber(_ zone: Zone) -> some View {
-        Text(zone.volume.formatted(.number.precision(store.useHalfSteps ? .fractionLength(1) : .fractionLength(0...1))))
-            .font(.system(size: 84, weight: .semibold, design: .rounded))
-            .monospacedDigit()
-            .contentTransition(.numericText(value: zone.volume))
-            .animation(.snappy(duration: 0.25), value: zone.volume)
-            .opacity(zone.mute ? 0.3 : 1)
-            .animation(.smooth(duration: 0.3), value: zone.mute)
+        VolumeReadout(volume: zone.volume, halfSteps: store.useHalfSteps, size: 84, muted: zone.mute)
     }
 
     private func zonePower(_ zone: Zone) -> Bool {
