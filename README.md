@@ -71,7 +71,7 @@ Zone names live in the app, because receivers don't expose them over the network
 
 ### On iPhone
 
-Same controls, laid out for one hand: the number in the middle, the slider and the buttons in the lower half, the zone switcher and settings in the navigation bar's glass. Swipe sideways to change zone. With **Settings → General → Use volume buttons** (on by default) your iPhone's volume buttons change the receiver's volume while the app is open and the receiver is on, and your phone's own volume is put back when you leave. The app reconnects by itself when you come back to it.
+Same controls, laid out for one hand: the number in the middle, the slider and the buttons in the lower half, the zone switcher and settings in the navigation bar's glass. Swipe sideways to change zone. With **Settings → General → Use volume buttons** (on by default) your iPhone's volume buttons change the receiver's volume while the app is open and the receiver is on, and your phone's own volume is put back when you leave. The slider is relative: put a finger anywhere on it and it moves exactly as far as you do, without jumping. The app reconnects by itself when you come back to it. Zone names sync between your devices through iCloud when the app is signed with an iCloud-capable (paid) developer account.
 
 ## How it talks to your receiver
 

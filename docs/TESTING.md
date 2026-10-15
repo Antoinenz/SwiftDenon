@@ -76,6 +76,8 @@ Use `--rendition Dark` for dark mode.
 - Disconnected (try `-host 127.0.0.1:2399`) or single zone: gear stays top right, no zone picker and no empty glass pill.
 - Scroll to change volume on: scrolling over the number or slider changes it in the window and the menu bar; off, nothing happens. Up is louder.
 - Hide when away on: icon disappears ~10 s after the receiver goes away and returns when it is back; *Show in menu bar* stays on in Settings throughout.
+- iPhone slider: tap anywhere on the track quickly, then hold: the volume never changes on touch alone, only when the finger moves; after a fast flick the receiver ends on the value shown (the old bug sent the previous volume back after a quick tap).
+- iCloud (needs a paid team and the entitlement): rename a zone on one device and see it on another within a minute or so.
 - iPhone, on a device (not yet done): volume buttons change the amp one step per press and hold-to-repeat works; the phone's own volume is back where it was after leaving the app or turning the setting off; no system volume overlay appears; with the amp off the buttons control the phone as usual; backgrounding for a while and coming back reconnects; swiping sideways changes zone; the local-network prompt appears on first launch.
 - Right-click (or control-click) the menu bar icon: Open, Settings…, Mute/Unmute, Turn On/Off, Quit. Mute and Turn Off act on the selected zone; Settings opens the window; left-click still opens the panel afterwards.
 - Volume number: crossing 9↔10 (or 99.5↔100) slides the digits and recentres rather than jumping, in the window and the menu bar.

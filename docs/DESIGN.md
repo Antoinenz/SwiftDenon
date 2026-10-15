@@ -9,7 +9,8 @@
 
 ## Layout (iPhone)
 
-- One screen, portrait. The zone switcher (a native segmented `Picker`, which the navigation bar draws as glass) and a glass gear sit in the navigation bar; there is no title.
+- One screen, portrait. The zone switcher (the same glass switcher as the menu bar: equal-width segments, a lens while pressed) and a glass gear sit in the navigation bar; there is no title. The native segmented control was tried first and padded its labels unevenly.
+- The slider is relative: it never jumps to where the finger lands, and moves exactly with it.
 - Behind it a soft `MeshGradient` in blues, dark or light to match the system, because glass over flat black or white has nothing to bend. Deliberately quiet.
 - Playing: the number at 112 pt in the middle, then `−` slider `+`, then, in the thumb's reach, power and mute at 80 pt and the input pill. Standby is one 120 pt power button and the zone's name. Connecting is a spinner, with no zone switcher.
 - With *Hide volume slider* on, `−` number `+` is one row at 76 pt.

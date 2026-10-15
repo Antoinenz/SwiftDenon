@@ -246,6 +246,16 @@ User: the menu bar switcher still wasn't really liquid glass and was wider than 
 - Found along the way: the system glass button style ignored `.tint` on iOS (the power button showed no green), so iOS applies `glassEffect` directly; removing the title in the settings sheet also removed the page switcher.
 - Simulator work: the first screenshot after a launch is a blank or black frame; wait longer. `simctl` can't tap, so debug launch arguments (`-debugSettings`, `-debugPage`, `-zone 2`) stand in for taps.
 
+## 33. First device run, slider fixes, iCloud
+
+User built it on their iPhone after fixing signing ("wow that looks wonderful"), then: spacing around the zone names in the top switcher; a bug where a quick click on the slider sets that volume for a split second and then goes back (unless held for a moment); on iOS the slider should move exactly with the finger rather than jump; iCloud sync for zone names, with more local settings possible later (documented, not built).
+
+- Spacing: the native segmented control on iPhone left "Living Room" cramped and "Pool Room" loose (segment widths follow content). iPhone now uses `GlassSegmented`.
+- The slider bug: `onEnd` re-sent `zone.volume` from the last render, which on a fast tap was still the old value, so the amp was told the new volume and then the old one. It now sends the value the drag itself reported. I couldn't reproduce it on the Mac (the demo receiver answers instantly), and the screen recording showed the volume landing on the new value and staying, so this is from reading the code, not from watching the failure; the fix makes the failure impossible rather than confirmed gone.
+- Relative slider for iPhone (`relative: true`).
+- `CloudSettings` mirrors `zoneNames` through `NSUbiquitousKeyValueStore`. A free Personal Team can't sign with the iCloud entitlement, so the entitlement is opt-in through the git-ignored `project.local.yml` and the code does nothing without it.
+- Not tested: iCloud across devices, the slider on a real finger after this change.
+
 ---
 
 ## Testing notes that shaped the work
