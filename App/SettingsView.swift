@@ -116,7 +116,7 @@ struct SettingsView: View {
             Text("Volume")
         } footer: {
             #if os(macOS)
-            Text("Scroll or swipe over the volume number or slider, in the window or the menu bar.")
+            Text("Scroll or swipe over the volume number or slider (the menu bar controller has the number only).")
             #endif
         }
         Section {

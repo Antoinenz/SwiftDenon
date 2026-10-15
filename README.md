@@ -63,9 +63,9 @@ Developed and tested against a Denon AVR-X2700H. Other Denon and Marantz receive
 | **Click** the input name | Pick an input |
 | **Click** the gear, or **⌘,** | Settings: Amp, Zones and General |
 
-Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number. **Scroll to change volume** lets the scroll wheel or a two-finger swipe over the number or slider change the volume, in the window and the menu bar.
+Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number. **Scroll to change volume** lets the scroll wheel or a two-finger swipe over the number or slider change the volume, in the window and the menu bar. (The menu bar controller never shows a slider.)
 
-The menu bar icon opens a compact controller with the same controls: zone switcher, volume, mute, power and input, plus ↑/↓, Space, P and Tab. The icon is the app's dial: the indicator sweeps with the volume and the ticks up to it light up. It becomes a ring when the zone is off and gets a slash when muted. **Open SwiftDenon** brings the window back if you closed it. Under **Settings → General → Menu Bar** you can hide it, or have it hide itself whenever the receiver can't be reached (when you're out of the house, say) and return once you're back on your network and it connects.
+The menu bar icon opens a compact controller: zone switcher, `−` volume `+`, the input, mute and power, plus ↑/↓, Space, P and Tab. Right-click the icon for Open, Settings…, Mute, Power and Quit. The icon is the app's dial: the indicator sweeps with the volume and the ticks up to it light up. It becomes a ring when the zone is off and gets a slash when muted. **Open SwiftDenon** brings the window back if you closed it. Under **Settings → General → Menu Bar** you can hide it, or have it hide itself whenever the receiver can't be reached (when you're out of the house, say) and return once you're back on your network and it connects.
 
 Zone names live in the app, because receivers don't expose them over the network. Set them under **Settings → Zones**.
 

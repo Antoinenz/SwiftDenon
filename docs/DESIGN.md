@@ -12,7 +12,7 @@
 - Frosted window (`containerBackground(.ultraThinMaterial, for: .window)`), 380 pt wide, native toolbar with the zone selector (segmented control, centred with the traffic lights) and a glass gear button at the trailing edge.
 - Playing: large rounded volume number, `−` slider `+`, power and mute glass buttons, and the current input as a glass pill that opens a popover list of the receiver's enabled inputs.
 - Standby: large power button and zone name, with equal 40 pt gaps above and below.
-- Menu bar: a 300 pt panel with the same glass controls. Glass zone switcher on top, then the volume number with mute and power beside it, the `−` slider `+` row, the input pill, and a quiet footer with *Open SwiftDenon* and *Quit*. With the slider hidden, `−` number `+` is centred and mute and power get their own row, because glass buttons draw larger than their frames and the single row overflowed.
+- Menu bar: a 300 pt panel. A zone switcher on top, built to match the toolbar's (glass track, equal-width segments, soft sliding thumb) because a popover has no toolbar to supply the real one. Then `−` number `+` (no slider; the window's sliderless layout), then one row with the input pill on the left and mute and power on the right, and *Open SwiftDenon* as a full-width glass button. There is no Quit in the panel: it lives in the menu you get by right-clicking the icon, with Open, Settings…, Mute and Power.
 
 ## Decisions and why
 

@@ -226,6 +226,15 @@ User sent a screenshot: the switcher sat on its own row below the traffic lights
 
 User, after two rounds of "still not right" with the main window's picker as the reference: it was the spacing around each option, not the glass. A fixed 220 pt frame left empty track at the right end and cramped "General". The picker now sizes to its labels (same 8 px inset around the selected pill as the zone picker), and the window shares the remote's material. Lesson: compare the two bars cropped at the same scale before declaring a match.
 
+## 31. Digit roll, slider bounce, simpler menu bar
+
+User: *"make the transition between volume numbers of different lengths smooth, and when clicking on the volume slider it bounces to the cursor with a liquid glass animation. then i think the menu bar window needs a little more simplification…"* (real glass zone switcher; no slider, the window's sliderless layout; power and volume buttons inline with the source selector; *Open* as a glass button; Quit moved to a right-click menu on the icon.) Afterwards: the digit change works in the window but not the menu bar, because the menu bar still had its own number view.
+
+- `VolumeReadout` is one `Text` per digit keyed by place, shared by the window and the menu bar.
+- Slider: the thumb bounces to the press point. The first version did nothing visible because two `.animation(_:value:)` modifiers fought in one transaction and the innermost wins; swapping them fixed it. I first "measured" this from a screen recording, which showed an instant jump; that was a bad instrument (stale frames), and a burst of screenshots with a temporary 1.5 s linear animation showed the truth.
+- Menu bar: zone switcher rebuilt to the toolbar picker's proportions (equal segments, 34 pt, soft thumb on a glass track); a native segmented `Picker` was tried first but looks flat in a popover, since only toolbars give it glass. Right-click menu via an `NSEvent` monitor on the status item's window.
+- Tried and dropped: SF Symbols on the context menu items; once set explicitly, macOS showed none of them.
+
 ---
 
 ## Testing notes that shaped the work
