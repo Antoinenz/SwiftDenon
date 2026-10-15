@@ -11,6 +11,8 @@ struct SwiftDenonApp: App {
     #endif
 
     init() {
+        // Half steps are on unless the user turned them off (the receiver still decides per zone).
+        UserDefaults.standard.register(defaults: ["halfStepVolume": true])
         let store = ReceiverStore()
         _store = State(initialValue: store)
         #if os(macOS)
@@ -33,6 +35,10 @@ struct SwiftDenonApp: App {
         #endif
 
         #if os(macOS)
+        Settings {
+            SettingsView().environment(store)
+        }
+
         // Read here so the scene updates when the receiver appears or goes away.
         let inserted = showInMenuBar && (!hideMenuBarWhenAway || menuBarIcon.reachable)
         // The setter is deliberately empty: SwiftUI reports `false` whenever the item is hidden,

@@ -7,7 +7,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.openURL) private var openURL
     @State private var manualHost = ""
-    @AppStorage("halfStepVolume") private var halfStepVolume = false
+    @AppStorage("halfStepVolume") private var halfStepVolume = true
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     @AppStorage("scrollChangesVolume") private var scrollChangesVolume = false
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
@@ -21,6 +21,21 @@ struct SettingsView: View {
     @State private var page = Page.amp
 
     var body: some View {
+        #if os(macOS)
+        // A real window (the Settings scene), so the switcher is the system's toolbar glass, the
+        // same as the zone picker in the main window. A sheet can't show a top toolbar on macOS.
+        form
+            .frame(width: 420, height: 540)
+        #else
+        NavigationStack {
+            form.toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button("Done", role: .confirm) { dismiss() } }
+            }
+        }
+        #endif
+    }
+
+    private var form: some View {
         Form {
             switch page {
             case .amp: ampPage
@@ -29,32 +44,17 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .scrollEdgeEffectStyle(.hard, for: .top)
-        // safeAreaBar (not safeAreaInset) gives the bar the system scroll-edge blur.
-        .safeAreaBar(edge: .top, spacing: 0) { header }
-        .frame(minWidth: 380, minHeight: 460)
-    }
-
-    /// Laid out like the main window's toolbar: switcher centred, round button on the right.
-    /// Built by hand because a sheet on macOS doesn't show toolbar items in its top bar.
-    private var header: some View {
-        ZStack {
-            GlassSegmented(selection: $page, options: Page.allCases) { Text($0.rawValue) }
-            HStack {
-                Spacer()
-                Button { dismiss() } label: {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 15, weight: .semibold))
-                        .frame(width: 22, height: 22)
+        .toolbar(removing: .title)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Picker("Page", selection: $page) {
+                    ForEach(Page.allCases) { Text($0.rawValue).tag($0) }
                 }
-                .buttonBorderShape(.circle)
-                .buttonStyle(.glassProminent)
-                .keyboardShortcut(.defaultAction)
-                .help("Done")
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .frame(width: 240)
             }
         }
-        .padding(.horizontal, 14)
-        .frame(height: 52)
     }
 
     @ViewBuilder private var ampPage: some View {
@@ -164,7 +164,7 @@ struct SettingsView: View {
             }
             if !store.demoMode {
                 ForEach(store.discovered.filter { $0.host != store.host }) { r in
-                    Button { store.select(host: r.host); dismiss() } label: {
+                    Button { store.select(host: r.host) } label: {
                         LabeledContent(r.name, value: r.host)
                     }
                 }
@@ -186,7 +186,6 @@ struct SettingsView: View {
                             #endif
                         Button("Connect") {
                             store.select(host: manualHost.trimmingCharacters(in: .whitespaces))
-                            dismiss()
                         }
                         .disabled(manualHost.trimmingCharacters(in: .whitespaces).isEmpty)
                     }

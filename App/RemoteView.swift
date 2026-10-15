@@ -4,6 +4,9 @@ import ReceiverKit
 struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
     @State private var showSettings = false
+    #if os(macOS)
+    @Environment(\.openSettings) private var openSettings
+    #endif
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     private enum Kind: Hashable { case connecting, standby, playing }
@@ -49,11 +52,17 @@ struct RemoteView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 // Keep the slot filled so the gear stays on the right when there is no picker.
-                if store.state.zones.count > 1 { ZonePicker() } else { Color.clear.frame(width: 200, height: 1) }
+                if showsZonePicker { ZonePicker() } else { Color.clear.frame(width: 200, height: 1) }
             }
-            .sharedBackgroundVisibility(store.state.zones.count > 1 ? .automatic : .hidden)
+            .sharedBackgroundVisibility(showsZonePicker ? .automatic : .hidden)
             ToolbarItem(placement: .primaryAction) {
-                GlassCircleButton(symbol: "gearshape", size: 12, iconSize: 15) { showSettings = true }
+                GlassCircleButton(symbol: "gearshape", size: 12, iconSize: 15) {
+                    #if os(macOS)
+                    openSettings()
+                    #else
+                    showSettings = true
+                    #endif
+                }
             }
             .sharedBackgroundVisibility(.hidden)
         }
@@ -72,8 +81,13 @@ struct RemoteView: View {
             store.selectZone(at: Int(press.characters)! - 1)
             return .handled
         }
+        #if os(iOS)
         .sheet(isPresented: $showSettings) { SettingsView() }
+        #endif
     }
+
+    /// Not while connecting: the zones are stale or unknown then.
+    private var showsZonePicker: Bool { store.state.connected && store.state.zones.count > 1 }
 
     private var connecting: some View {
         VStack(spacing: 14) {
