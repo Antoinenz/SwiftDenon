@@ -43,6 +43,7 @@ struct PhoneView: View {
                 ToolbarItem(placement: .principal) {
                     if connected && store.state.zones.count > 1 { ZonePicker() }
                 }
+                .sharedBackgroundVisibility(.hidden)   // the switcher draws its own glass
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("Settings", systemImage: "gearshape") { showSettings = true }
                 }
@@ -114,8 +115,8 @@ struct PhoneView: View {
                     GlassCircleButton(symbol: "minus", size: 52) { Haptics.tick(); store.stepVolume(by: -1) }
                     GlassSlider(
                         value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
-                        range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
-                        onEnd: { store.setVolume(zone.volume, final: true) }
+                        range: 0...zone.maxVolume, halfStep: store.useHalfSteps, relative: true,
+                        onEnd: { store.setVolume($0, final: true) }
                     )
                     GlassCircleButton(symbol: "plus", size: 52) { Haptics.tick(); store.stepVolume(by: 1) }
                 }

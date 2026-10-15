@@ -43,13 +43,21 @@ struct GlassCircleButton: View {
 
 /// Capsule volume slider with a glass thumb. The thumb follows the pointer continuously;
 /// only the reported value snaps (to whole numbers, or half steps for slow drags when enabled).
+///
+/// Two ways to drag. By default (Mac) pressing the track makes the thumb bounce to the pointer.
+/// With `relative` (iPhone) the thumb stays where it is when touched and then moves exactly as
+/// far as the finger does, so a finger can start anywhere on the slider without anything jumping.
 struct GlassSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
     var dimmed = false
     /// 0.5 steps enabled. Even then, fast drags snap to whole numbers.
     var halfStep = false
-    var onEnd: () -> Void = {}
+    var relative = false
+    /// Called when the pointer lifts, with the last value the drag reported. It is passed in
+    /// because a fast tap can end before the view has re-rendered, so reading the current value
+    /// from the view could send the old one back to the receiver.
+    var onEnd: (Double) -> Void = { _ in }
 
     private let thumb: CGFloat = 30
     private let fastSpeed: CGFloat = 350
@@ -58,13 +66,17 @@ struct GlassSlider: View {
     @State private var lastTime: Date = .distantPast
     @State private var speed: CGFloat = 0   // smoothed points/second
     @State private var lastWhole = -1
+    /// The last value this drag set, if it set one.
+    @State private var reported: Double?
     /// From the press until the pointer moves away from where it landed: the thumb bounces over to
     /// the cursor. Afterwards it follows the drag on a stiff spring.
     @State private var landing = false
     @State private var pressX: CGFloat = 0
+    @State private var startFraction: Double = 0
 
-    private var thumbAnimation: Animation {
+    private var thumbAnimation: Animation? {
         if dragFraction == nil { return .smooth(duration: 0.2) }
+        if relative { return nil }   // the thumb is the finger: no lag
         return landing ? .bouncy(duration: 0.55, extraBounce: 0.25) : .interactiveSpring(response: 0.14, dampingFraction: 0.85)
     }
 
@@ -97,12 +109,23 @@ struct GlassSlider: View {
                         else if dt > 0 { speed = speed * 0.6 + abs(g.location.x - lastX) / dt * 0.4 }
                         lastX = g.location.x; lastTime = g.time
 
-                        let f = min(1, max(0, (g.location.x - thumb / 2) / usable))
-                        if dragFraction == nil { landing = true; pressX = g.location.x }
-                        else if landing, abs(g.location.x - pressX) > 6 { landing = false }
+                        let first = dragFraction == nil
+                        let f: Double
+                        if relative {
+                            if first { startFraction = valueFraction; pressX = g.location.x }
+                            f = min(1, max(0, startFraction + Double((g.location.x - pressX) / usable)))
+                        } else {
+                            if first { landing = true; pressX = g.location.x }
+                            else if landing, abs(g.location.x - pressX) > 6 { landing = false }
+                            f = min(1, max(0, (g.location.x - thumb / 2) / usable))
+                        }
                         dragFraction = f
-                        let raw = range.lowerBound + Double(f) * (range.upperBound - range.lowerBound)
+                        // Touching the thumb is not a change: nothing is reported until it moves.
+                        if relative && first { lastWhole = Int(value); return }
+
+                        let raw = range.lowerBound + f * (range.upperBound - range.lowerBound)
                         let snapped = halfStep && speed < fastSpeed ? (raw * 2).rounded() / 2 : raw.rounded()
+                        reported = snapped
                         if snapped != value { value = snapped }
                         // The press itself is silent; only crossing values while dragging ticks.
                         if Int(snapped) != lastWhole {
@@ -114,7 +137,8 @@ struct GlassSlider: View {
                         speed = 0; lastTime = .distantPast; lastWhole = -1
                         landing = false
                         dragFraction = nil
-                        onEnd()
+                        if let reported { onEnd(reported) }
+                        reported = nil
                     }
             )
         }
@@ -162,12 +186,13 @@ struct VerticalGlassSlider: View {
 struct GlassSegmented<Option: Hashable, Label: View>: View {
     @Binding var selection: Option
     let options: [Option]
+    var fontSize: CGFloat = 13
+    var height: CGFloat = 28
     @ViewBuilder let label: (Option) -> Label
 
     @State private var pressed = false
     @State private var segmentWidth: CGFloat = 0
     private let inset: CGFloat = 3
-    private let height: CGFloat = 28
 
     private var index: Int { options.firstIndex(of: selection) ?? 0 }
 
@@ -181,7 +206,7 @@ struct GlassSegmented<Option: Hashable, Label: View>: View {
                         ForEach(options, id: \.self) { label($0).hidden() }
                         label(option)
                     }
-                    .font(.system(size: 13, weight: .medium))
+                    .font(.system(size: fontSize, weight: .medium))
                     .lineLimit(1)
                     .padding(.horizontal, 14)
                     .frame(height: height)

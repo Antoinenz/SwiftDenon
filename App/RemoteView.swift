@@ -134,7 +134,7 @@ struct RemoteView: View {
                     GlassSlider(
                         value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
                         range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
-                        onEnd: { store.setVolume(zone.volume, final: true) }
+                        onEnd: { store.setVolume($0, final: true) }
                     )
                     .scrollsVolume(store)
                     GlassCircleButton(symbol: "plus", size: 40) { store.stepVolume(by: 1) }
