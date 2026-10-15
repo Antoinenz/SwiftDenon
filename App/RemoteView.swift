@@ -1,12 +1,11 @@
+#if os(macOS)
 import SwiftUI
 import ReceiverKit
 
+/// The Mac window. iPhone has its own layout in `PhoneView`.
 struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
-    @State private var showSettings = false
-    #if os(macOS)
     @Environment(\.openWindow) private var openWindow
-    #endif
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     private enum Kind: Hashable { case connecting, standby, playing }
@@ -43,9 +42,7 @@ struct RemoteView: View {
                 .frame(width: 380)
                 .animation(.smooth(duration: 0.35), value: isPlaying)
             }
-        #if os(macOS)
         .background(WindowHeightAnimator(height: heights[kind] ?? defaultHeights[kind] ?? 300))
-        #endif
         .containerBackground(.ultraThinMaterial, for: .window)
         .toolbar(removing: .title)
         .toolbarBackgroundVisibility(.hidden, for: .windowToolbar)
@@ -57,11 +54,7 @@ struct RemoteView: View {
             .sharedBackgroundVisibility(showsZonePicker ? .automatic : .hidden)
             ToolbarItem(placement: .primaryAction) {
                 GlassCircleButton(symbol: "gearshape", size: 12, iconSize: 15) {
-                    #if os(macOS)
                     openWindow(id: SwiftDenonApp.settingsWindowID)
-                    #else
-                    showSettings = true
-                    #endif
                 }
             }
             .sharedBackgroundVisibility(.hidden)
@@ -81,9 +74,6 @@ struct RemoteView: View {
             store.selectZone(at: Int(press.characters)! - 1)
             return .handled
         }
-        #if os(iOS)
-        .sheet(isPresented: $showSettings) { SettingsView() }
-        #endif
     }
 
     /// Not while connecting: the zones are stale or unknown then.
@@ -178,3 +168,4 @@ struct RemoteView: View {
         return zone.power
     }
 }
+#endif

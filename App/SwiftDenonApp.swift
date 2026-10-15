@@ -14,7 +14,7 @@ struct SwiftDenonApp: App {
 
     init() {
         // Half steps are on unless the user turned them off (the receiver still decides per zone).
-        UserDefaults.standard.register(defaults: ["halfStepVolume": true])
+        UserDefaults.standard.register(defaults: ["halfStepVolume": true, "volumeButtons": true])
         let store = ReceiverStore()
         _store = State(initialValue: store)
         #if os(macOS)
@@ -25,7 +25,7 @@ struct SwiftDenonApp: App {
 
     var body: some Scene {
         WindowGroup(id: Self.remoteWindowID) {
-            RemoteView()
+            RootView()
                 .environment(store)
                 .task { store.start(); store.watchNetwork() }
                 #if DEBUG
@@ -57,6 +57,17 @@ struct SwiftDenonApp: App {
             MenuBarLabel(icon: menuBarIcon, menu: menuBarMenu)
         }
         .menuBarExtraStyle(.window)
+        #endif
+    }
+}
+
+/// The remote: a window on the Mac, a full screen on iPhone.
+private struct RootView: View {
+    var body: some View {
+        #if os(macOS)
+        RemoteView()
+        #else
+        PhoneView()
         #endif
     }
 }
