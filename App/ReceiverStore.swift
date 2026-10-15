@@ -1,4 +1,5 @@
 import Foundation
+import Network
 import Observation
 import ReceiverKit
 
@@ -18,6 +19,8 @@ final class ReceiverStore {
     private var listener: Task<Void, Never>?
     private var connector: Task<Void, Never>?
     private var lastVolumeSend = Date.distantPast
+    private var pathMonitor: NWPathMonitor?
+    private var lastPathSignature = ""
 
     init() {
         host = UserDefaults.standard.string(forKey: "host") ?? ""
@@ -93,6 +96,26 @@ final class ReceiverStore {
                 try? await Task.sleep(nanoseconds: 3_000_000_000)
             }
         }
+    }
+
+    /// Starts over as soon as the network changes while disconnected (joining home Wi-Fi, say),
+    /// rather than waiting out the retry backoff. Call once.
+    func watchNetwork() {
+        guard pathMonitor == nil else { return }
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { [weak self] path in
+            let signature = "\(path.status)-" + path.availableInterfaces.map(\.name).joined(separator: ",")
+            Task { @MainActor in
+                guard let self, signature != self.lastPathSignature else { return }
+                let first = self.lastPathSignature.isEmpty
+                self.lastPathSignature = signature
+                guard !first, path.status == .satisfied, !self.demoMode, !self.state.connected else { return }
+                try? await Task.sleep(for: .seconds(1))   // let DHCP and routes settle
+                if !self.state.connected { self.start() }
+            }
+        }
+        monitor.start(queue: .main)
+        pathMonitor = monitor
     }
 
     func select(host newHost: String) {
