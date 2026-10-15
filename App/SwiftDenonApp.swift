@@ -7,6 +7,7 @@ struct SwiftDenonApp: App {
     @State private var store: ReceiverStore
     #if os(macOS)
     @State private var menuBarIcon: MenuBarIconModel
+    @State private var menuBarMenu: MenuBarContextMenu
     @AppStorage("showInMenuBar") private var showInMenuBar = true
     @AppStorage("hideMenuBarWhenAway") private var hideMenuBarWhenAway = false
     #endif
@@ -18,6 +19,7 @@ struct SwiftDenonApp: App {
         _store = State(initialValue: store)
         #if os(macOS)
         _menuBarIcon = State(initialValue: MenuBarIconModel(store: store))
+        _menuBarMenu = State(initialValue: MenuBarContextMenu(store: store))
         #endif
     }
 
@@ -52,7 +54,7 @@ struct SwiftDenonApp: App {
         MenuBarExtra(isInserted: Binding(get: { inserted }, set: { _ in })) {
             MenuBarView().environment(store)
         } label: {
-            Image(nsImage: menuBarIcon.image)
+            MenuBarLabel(icon: menuBarIcon, menu: menuBarMenu)
         }
         .menuBarExtraStyle(.window)
         #endif
