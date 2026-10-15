@@ -1,0 +1,10 @@
+# Copy to project.local.yml (git-ignored) and run `xcodegen generate`.
+# project.yml includes it when it exists.
+targets:
+  SwiftDenon:
+    settings:
+      base:
+        DEVELOPMENT_TEAM: YOURTEAMID
+        # Only with a paid Apple Developer Program team: turns on iCloud sync of zone names.
+        # A free Personal Team can't sign with this entitlement, so leave it out there.
+        # CODE_SIGN_ENTITLEMENTS: Config/SwiftDenon.entitlements

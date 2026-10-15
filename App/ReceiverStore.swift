@@ -22,11 +22,17 @@ final class ReceiverStore {
     private var pathMonitor: NWPathMonitor?
     private var lastPathSignature = ""
 
+    private let cloud = CloudSettings()
+    private var cloudObserver: NSObjectProtocol?
+
     init() {
         host = UserDefaults.standard.string(forKey: "host") ?? ""
         receiverName = UserDefaults.standard.string(forKey: "name")
-        let saved = UserDefaults.standard.dictionary(forKey: "zoneNames") as? [String: String] ?? [:]
-        zoneNames = Dictionary(uniqueKeysWithValues: saved.compactMap { k, v in Int(k).map { ($0, String(v.prefix(Self.maxZoneNameLength))) } })
+        cloud.start()   // before zone names are read, so iCloud's copy is the one loaded
+        reloadZoneNames()
+        cloudObserver = NotificationCenter.default.addObserver(forName: .cloudSettingsDidChange, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated { self?.reloadZoneNames() }
+        }
         let launchZone = UserDefaults.standard.integer(forKey: "zone") // `-zone 2` launch argument
         if launchZone > 0 { zoneID = launchZone }
     }
@@ -36,6 +42,12 @@ final class ReceiverStore {
     var useHalfSteps: Bool { zone.halfStep && UserDefaults.standard.bool(forKey: "halfStepVolume") }
     /// Keeps the toolbar's zone picker from overflowing.
     static let maxZoneNameLength = 12
+
+    /// Zone names live in `UserDefaults`, which iCloud keeps in step (see `CloudSettings`).
+    private func reloadZoneNames() {
+        let saved = UserDefaults.standard.dictionary(forKey: "zoneNames") as? [String: String] ?? [:]
+        zoneNames = Dictionary(uniqueKeysWithValues: saved.compactMap { k, v in Int(k).map { ($0, String(v.prefix(Self.maxZoneNameLength))) } })
+    }
 
     func name(of zone: Zone) -> String { zoneNames[zone.id] ?? zone.name }
 
