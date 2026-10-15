@@ -43,6 +43,15 @@ struct GlassSlider: View {
     @State private var lastTime: Date = .distantPast
     @State private var speed: CGFloat = 0   // smoothed points/second
     @State private var lastWhole = -1
+    /// From the press until the pointer moves away from where it landed: the thumb bounces over to
+    /// the cursor. Afterwards it follows the drag on a stiff spring.
+    @State private var landing = false
+    @State private var pressX: CGFloat = 0
+
+    private var thumbAnimation: Animation {
+        if dragFraction == nil { return .smooth(duration: 0.2) }
+        return landing ? .bouncy(duration: 0.55, extraBounce: 0.25) : .interactiveSpring(response: 0.14, dampingFraction: 0.85)
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -61,6 +70,9 @@ struct GlassSlider: View {
             }
             .frame(maxHeight: .infinity)
             .contentShape(.rect)
+            // The innermost modifier wins when both change in one transaction (a press changes the
+            // value and the drag position together), so the drag animation goes first.
+            .animation(thumbAnimation, value: dragFraction)
             .animation(dragFraction == nil ? .smooth(duration: 0.25) : nil, value: value)
             .gesture(
                 DragGesture(minimumDistance: 0)
@@ -71,6 +83,8 @@ struct GlassSlider: View {
                         lastX = g.location.x; lastTime = g.time
 
                         let f = min(1, max(0, (g.location.x - thumb / 2) / usable))
+                        if dragFraction == nil { landing = true; pressX = g.location.x }
+                        else if landing, abs(g.location.x - pressX) > 6 { landing = false }
                         dragFraction = f
                         let raw = range.lowerBound + Double(f) * (range.upperBound - range.lowerBound)
                         let snapped = halfStep && speed < fastSpeed ? (raw * 2).rounded() / 2 : raw.rounded()
@@ -83,7 +97,8 @@ struct GlassSlider: View {
                     }
                     .onEnded { _ in
                         speed = 0; lastTime = .distantPast; lastWhole = -1
-                        withAnimation(.smooth(duration: 0.2)) { dragFraction = nil }
+                        landing = false
+                        dragFraction = nil
                         onEnd()
                     }
             )
