@@ -1,4 +1,8 @@
 name: SwiftDenon
+# Per-machine settings (your development team) go in project.local.yml, which isn't committed.
+include:
+  - path: project.local.yml
+    required: false
 options:
   bundleIdPrefix: dev.antoine
   deploymentTarget:
