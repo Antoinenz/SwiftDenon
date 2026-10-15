@@ -235,6 +235,17 @@ User: *"make the transition between volume numbers of different lengths smooth, 
 - Menu bar: zone switcher rebuilt to the toolbar picker's proportions (equal segments, 34 pt, soft thumb on a glass track); a native segmented `Picker` was tried first but looks flat in a popover, since only toolbars give it glass. Right-click menu via an `NSEvent` monitor on the status item's window.
 - Tried and dropped: SF Symbols on the context menu items; once set explicitly, macOS showed none of them.
 
+## 32. iPhone app
+
+User: the menu bar switcher still wasn't really liquid glass and was wider than it needed to be (the glass *Open* button was fine, if large); then *"use the past design language and what ive told you in this chat, to build a matching ios app designed for an iphone, with features that integrate right in, like a setting (enabled by default) being able to use the volume buttons on the iphone to control the amps volume when the app is open."*
+
+- Switcher: I held the mouse down on the real toolbar picker and captured it. At rest the thumb is a soft flat pill; pressed, it becomes a glass lens that swells past the track and follows the pointer. `GlassSegmented` now does that, with equal-width segments sized to the widest label and no full-width stretch.
+- iPhone: `PhoneView`, in the same glass language, with a quiet mesh-gradient background so the glass has something to bend. `RemoteView` became macOS-only, which also fixed the broken iOS build.
+- Volume buttons: the AVAudioSession-output-volume trick (park at 0.5, read the direction, reset), restoring the user's volume afterwards. Default on, only while the app is active and the zone is on. **Not testable in the simulator**: it has no buttons, so this is unverified until it runs on a phone.
+- Other integrations: reconnect on returning to the app (iOS suspends it and the socket dies silently), soft haptics on buttons, sideways swipe to change zone.
+- Found along the way: the system glass button style ignored `.tint` on iOS (the power button showed no green), so iOS applies `glassEffect` directly; removing the title in the settings sheet also removed the page switcher.
+- Simulator work: the first screenshot after a launch is a blank or black frame; wait longer. `simctl` can't tap, so debug launch arguments (`-debugSettings`, `-debugPage`, `-zone 2`) stand in for taps.
+
 ---
 
 ## Testing notes that shaped the work

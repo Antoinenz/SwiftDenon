@@ -5,7 +5,17 @@
 1. **Almost nothing on screen.** Show only what's relevant to the current state: a powered-off zone shows one big power button; a powered-on zone shows volume, slider, power/mute and the input.
 2. **Native first.** Use the system's glass button styles, segmented control, toolbar and popover so hover, press and focus come for free. Custom glass only where no system control exists (slider thumb, EQ faders).
 3. **Optimistic and calm.** Changes appear instantly and never flicker back.
-4. **Mac-first.** Window chrome, toolbar and trackpad behaviour are designed for macOS 26; iOS shares the code.
+4. **Mac-first.** Window chrome, toolbar and trackpad behaviour are designed for macOS 26. The iPhone app reuses the same controls (`GlassCircleButton`, `GlassSlider`, `VolumeReadout`, `InputPicker`) in its own layout.
+
+## Layout (iPhone)
+
+- One screen, portrait. The zone switcher (a native segmented `Picker`, which the navigation bar draws as glass) and a glass gear sit in the navigation bar; there is no title.
+- Behind it a soft `MeshGradient` in blues, dark or light to match the system, because glass over flat black or white has nothing to bend. Deliberately quiet.
+- Playing: the number at 112 pt in the middle, then `−` slider `+`, then, in the thumb's reach, power and mute at 80 pt and the input pill. Standby is one 120 pt power button and the zone's name. Connecting is a spinner, with no zone switcher.
+- With *Hide volume slider* on, `−` number `+` is one row at 76 pt.
+- Buttons give a soft haptic knock (the Mac's trackpad clicks for itself); slider detents and volume-button steps use the selection tick.
+- Swipe sideways anywhere that isn't a control to change zone.
+- Volume buttons: see ARCHITECTURE. The number is the feedback, so the system volume overlay is suppressed.
 
 ## Layout (macOS)
 

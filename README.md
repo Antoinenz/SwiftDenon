@@ -38,7 +38,7 @@ There are no releases yet. Build it from source (see [Development](#development)
 | Platform | Status |
 |----------|--------|
 | macOS 26 or later | Supported |
-| iOS 26 or later | In progress |
+| iOS 26 or later (iPhone) | Builds and runs in the simulator; not yet tried on a device |
 
 Developed and tested against a Denon AVR-X2700H. Other Denon and Marantz receivers with network control should work.
 
@@ -68,6 +68,10 @@ Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/�
 The menu bar icon opens a compact controller: zone switcher, `−` volume `+`, the input, mute and power, plus ↑/↓, Space, P and Tab. Right-click the icon for Open, Settings…, Mute, Power and Quit. The icon is the app's dial: the indicator sweeps with the volume and the ticks up to it light up. It becomes a ring when the zone is off and gets a slash when muted. **Open SwiftDenon** brings the window back if you closed it. Under **Settings → General → Menu Bar** you can hide it, or have it hide itself whenever the receiver can't be reached (when you're out of the house, say) and return once you're back on your network and it connects.
 
 Zone names live in the app, because receivers don't expose them over the network. Set them under **Settings → Zones**.
+
+### On iPhone
+
+Same controls, laid out for one hand: the number in the middle, the slider and the buttons in the lower half, the zone switcher and settings in the navigation bar's glass. Swipe sideways to change zone. With **Settings → General → Use volume buttons** (on by default) your iPhone's volume buttons change the receiver's volume while the app is open and the receiver is on, and your phone's own volume is put back when you leave. The app reconnects by itself when you come back to it.
 
 ## How it talks to your receiver
 
