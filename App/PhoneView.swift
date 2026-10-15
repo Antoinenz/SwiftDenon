@@ -14,6 +14,8 @@ struct PhoneView: View {
     @State private var showSettings = false
     #endif
     @State private var leftAt: Date?
+    @State private var inputsOpen = false
+    @State private var height: CGFloat = 0
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     @AppStorage("volumeButtons") private var volumeButtons = true
 
@@ -48,14 +50,21 @@ struct PhoneView: View {
                     Button("Settings", systemImage: "gearshape") { showSettings = true }
                 }
             }
-            // Swipe sideways anywhere that isn't a control to change zone. Controls claim their own drags first.
+            // Swipe sideways anywhere that isn't a control to change zone, or up from the bottom third
+            // for the inputs. Controls (the slider especially) claim their own drags first.
             .gesture(
                 DragGesture(minimumDistance: 40).onEnded { g in
-                    guard abs(g.translation.width) > abs(g.translation.height) * 1.5, abs(g.translation.width) > 60 else { return }
-                    Haptics.tick()
-                    store.cycleZone(by: g.translation.width < 0 ? 1 : -1)
+                    let dx = g.translation.width, dy = g.translation.height
+                    if abs(dx) > abs(dy) * 1.5, abs(dx) > 60 {
+                        Haptics.tick()
+                        store.cycleZone(by: dx < 0 ? 1 : -1)
+                    } else if kind == .playing, -dy > 60, -dy > abs(dx) * 1.5, g.startLocation.y > height * 2 / 3 {
+                        Haptics.tap()
+                        inputsOpen = true
+                    }
                 }
             )
+            .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { height = $0 }
         }
         .sheet(isPresented: $showSettings) { SettingsView() }
         // The buttons only belong to the amp while it is actually playing and we are on screen.
@@ -101,10 +110,10 @@ struct PhoneView: View {
             if hideVolumeSlider {
                 // No slider: − and + either side of the number.
                 HStack(spacing: 12) {
-                    GlassCircleButton(symbol: "minus", size: 56) { Haptics.tick(); store.stepVolume(by: -1) }
+                    GlassCircleButton(symbol: "minus", size: 56, repeats: true) { Haptics.tick(); store.stepVolume(by: -1) }
                     VolumeReadout(volume: zone.volume, halfSteps: store.useHalfSteps, size: 76, muted: zone.mute)
                         .frame(maxWidth: .infinity)
-                    GlassCircleButton(symbol: "plus", size: 56) { Haptics.tick(); store.stepVolume(by: 1) }
+                    GlassCircleButton(symbol: "plus", size: 56, repeats: true) { Haptics.tick(); store.stepVolume(by: 1) }
                 }
                 .opacity(zone.mute ? 0.55 : 1)
             } else {
@@ -112,13 +121,13 @@ struct PhoneView: View {
                     .frame(maxWidth: .infinity)
                 Spacer(minLength: 28).frame(maxHeight: 56)
                 HStack(spacing: 12) {
-                    GlassCircleButton(symbol: "minus", size: 52) { Haptics.tick(); store.stepVolume(by: -1) }
+                    GlassCircleButton(symbol: "minus", size: 52, repeats: true) { Haptics.tick(); store.stepVolume(by: -1) }
                     GlassSlider(
                         value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
                         range: 0...zone.maxVolume, halfStep: store.useHalfSteps, relative: true,
                         onEnd: { store.setVolume($0, final: true) }
                     )
-                    GlassCircleButton(symbol: "plus", size: 52) { Haptics.tick(); store.stepVolume(by: 1) }
+                    GlassCircleButton(symbol: "plus", size: 52, repeats: true) { Haptics.tick(); store.stepVolume(by: 1) }
                 }
                 .opacity(zone.mute ? 0.35 : 1)
             }
@@ -130,7 +139,7 @@ struct PhoneView: View {
                                       active: zone.mute, tint: .orange, size: 80) { Haptics.tap(); store.toggleMute() }
                 }
             }
-            InputPicker()
+            InputPicker(isOpen: $inputsOpen)
                 .controlSize(.large)
                 .padding(.top, 24)
         }

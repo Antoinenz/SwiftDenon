@@ -5,14 +5,18 @@ import ReceiverKit
 /// opens a popover with the receiver's enabled inputs.
 struct InputPicker: View {
     @Environment(ReceiverStore.self) private var store
-    @State private var open = false
+    /// Lets a parent open the list too (the iPhone does on a swipe up).
+    var isOpen: Binding<Bool>?
+    @State private var localOpen = false
+
+    private var open: Binding<Bool> { isOpen ?? $localOpen }
 
     var body: some View {
         let inputs = store.state.inputs
         let current = store.zone.input
         let name = inputs.first { $0.id == current }?.name ?? current.map(DenonProtocol.defaultName(for:)) ?? "Input"
 
-        Button { open.toggle() } label: {
+        Button { open.wrappedValue.toggle() } label: {
             HStack(spacing: 8) {
                 Text(name).font(.headline).lineLimit(1)
                     .id(name)
@@ -25,12 +29,12 @@ struct InputPicker: View {
         .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
         .animation(.snappy, value: name)
-        .popover(isPresented: $open) {
+        .popover(isPresented: open) {
             VStack(spacing: 2) {
                 ForEach(inputs) { input in
                     InputRow(name: input.name, selected: input.id == current) {
                         store.setInput(input.id)
-                        open = false
+                        open.wrappedValue = false
                     }
                 }
             }
