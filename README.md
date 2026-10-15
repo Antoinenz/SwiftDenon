@@ -23,8 +23,9 @@ It finds your receiver on the network by itself and keeps a live connection to i
 - **Every zone**: Main, Zone 2 and Zone 3, each with its own power, volume, mute and input, with names you choose
 - **Your inputs, your names**: input names and hidden inputs come straight from the receiver's setup
 - **Instant feedback**: controls react immediately and reconcile with the amp, so nothing jumps back while the receiver catches up
-- **Smooth volume**: a glass slider that follows your pointer, with optional 0.5 dB half steps on zones that support them
+- **Smooth volume**: a glass slider that follows your pointer, with optional 0.5 dB half steps on zones that support them, and optional scrolling over the number or slider
 - **Sound settings**: sound mode, dynamic EQ, bass, treble and subwoofer faders, sleep timer
+- **Hides when you're out**: optionally removes the menu bar item when your receiver can't be reached, and brings it back when you're home
 - **Menu bar controller**: zones, power, volume, mute and input from the menu bar, with an icon that is a live volume dial
 - **Shortcuts**: power, volume, mute and input actions
 - **Demo mode**: try everything against a simulated receiver, no amp needed
@@ -62,9 +63,9 @@ Developed and tested against a Denon AVR-X2700H. Other Denon and Marantz receive
 | **Click** the input name | Pick an input |
 | **Click** the gear | Settings: Amp, Zones and General |
 
-Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number.
+Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number. **Scroll to change volume** lets the scroll wheel or a two-finger swipe over the number or slider change the volume, in the window and the menu bar.
 
-The menu bar icon opens a compact controller with the same controls: zone switcher, volume, mute, power and input, plus ↑/↓, Space, P and Tab. The icon is the app's dial: the indicator sweeps with the volume and the ticks up to it light up. It becomes a ring when the zone is off and gets a slash when muted. **Open SwiftDenon** brings the window back if you closed it, and **Settings → General → Show in menu bar** hides it.
+The menu bar icon opens a compact controller with the same controls: zone switcher, volume, mute, power and input, plus ↑/↓, Space, P and Tab. The icon is the app's dial: the indicator sweeps with the volume and the ticks up to it light up. It becomes a ring when the zone is off and gets a slash when muted. **Open SwiftDenon** brings the window back if you closed it. Under **Settings → General → Menu Bar** you can hide it, or have it hide itself whenever the receiver can't be reached (when you're out of the house, say) and return once you're back on your network and it connects.
 
 Zone names live in the app, because receivers don't expose them over the network. Set them under **Settings → Zones**.
 

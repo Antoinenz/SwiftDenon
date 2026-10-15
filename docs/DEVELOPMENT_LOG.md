@@ -200,6 +200,15 @@ User: *"update the menu bar icon to match the app icon, except can you make the 
 - A menu bar label can't animate itself, so `MenuBarIconModel` eases between values and swaps the image.
 - Checked by capturing frames after a slider jump in demo mode: three distinct frames, then it settles. 70 renders the same pose as the app icon.
 
+## 27. Haptics, hiding the menu bar when away, scroll volume
+
+- *"remove the haptic feedback when clicking on the volume button, keep it when scrolling"*: the slider ticked on the initial press; now the first touch is silent and only crossing values while dragging ticks. The user wasn't sure it was fixed (it may have been an old build still running).
+- *"hide the menu bar when not on a network where a paired AVR is on"*: setting *Hide when away from the receiver*. Building it turned up three real problems:
+  - The driver never noticed a connection that went quiet. It now uses TCP keepalive, treats EOF or a socket error as a disconnect and reacts to a non-viable network path.
+  - Coming back to a network waited out the retry backoff; the store now restarts when the network changes while disconnected.
+  - The hidden item never returned. SwiftUI calls the `isInserted` setter with `false` on every hide, and writing that to `showInMenuBar` overwrote the user's preference. The setter is now empty. This also cost a long detour: a theory about macOS's `NSStatusItem Visible…` flag, tried and removed.
+- *"a setting to allow scrolling on the volume number and slider to change the volume"*: `Scroll to change volume`, off by default. Checked with synthetic pixel scrolls: down lowers, up raises. The mouse-wheel path wasn't verified cleanly because the volume was being changed by hand during the test.
+
 ---
 
 ## Testing notes that shaped the work
