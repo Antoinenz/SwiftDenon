@@ -4,9 +4,9 @@
 
 # SwiftDenon
 
-**A small, modern remote for Denon and Marantz network receivers. Built in SwiftUI for macOS 26, with Liquid Glass and no dependencies.**
+**A small, modern remote for Denon and Marantz network receivers. Built in SwiftUI for macOS 26 and iPhone, with Liquid Glass and no dependencies.**
 
-It finds your receiver on the network by itself and keeps a live connection to it, so what you see is always what the amp is doing, even when someone else grabs the physical remote. Power, volume, mute, inputs and every zone in one small window, plus a menu bar controller and Shortcuts actions for when you don't want a window at all.
+It finds your receiver on the network by itself and keeps a live connection to it, so what you see is always what the amp is doing, even when someone else grabs the physical remote. Power, volume, mute, inputs and every zone in one small window (or one phone screen), plus a menu bar controller and Shortcuts actions for when you don't want a window at all.
 
 <br>
 
@@ -23,10 +23,12 @@ It finds your receiver on the network by itself and keeps a live connection to i
 - **Every zone**: Main, Zone 2 and Zone 3, each with its own power, volume, mute and input, with names you choose
 - **Your inputs, your names**: input names and hidden inputs come straight from the receiver's setup
 - **Instant feedback**: controls react immediately and reconcile with the amp, so nothing jumps back while the receiver catches up
-- **Smooth volume**: a glass slider that follows your pointer, with 0.5 dB half steps on zones that support them, and optional scrolling over the number or slider
+- **Smooth volume**: a glass slider that bounces to where you click and follows your pointer, a number whose digits roll in place as it changes length, 0.5 dB half steps on zones that support them, and optional scrolling over the number or slider
 - **Sound settings**: sound mode, dynamic EQ, bass, treble and subwoofer faders, sleep timer
 - **Hides when you're out**: optionally removes the menu bar item when your receiver can't be reached, and brings it back when you're home
-- **Menu bar controller**: zones, power, volume, mute and input from the menu bar, with an icon that is a live volume dial
+- **Menu bar controller**: zones, `−` volume `+`, input, mute and power from the menu bar, with an icon that is a live volume dial and a right-click menu (Open, Settings…, Mute, Power, Quit)
+- **iPhone app**: the same glass controls laid out for one hand, a relative slider that moves exactly with your finger, swipe to change zone, and your iPhone's volume buttons controlling the amp while the app is open
+- **iCloud sync**: zone names follow you between devices (needs an iCloud-capable signing team, see Development)
 - **Shortcuts**: power, volume, mute and input actions
 - **Demo mode**: try everything against a simulated receiver, no amp needed
 - **Minimal footprint**: native SwiftUI, one small window, no third-party code
@@ -104,6 +106,8 @@ cd Packages/ReceiverKit && swift test
 ```
 
 Or open `SwiftDenon.xcodeproj`, set your signing team and run the SwiftDenon scheme.
+
+**iPhone.** Build for the simulator with `-destination 'generic/platform=iOS Simulator'`, or run on a device. Device builds must be signed. Rather than committing your team ID, copy `project.local.example.yml` to `project.local.yml` (git-ignored; `project.yml` includes it when present), put your team ID in it and run `xcodegen generate` again. A free Personal Team works for running on your own phone (the app then expires after 7 days). iCloud sync of zone names additionally needs a paid developer account: uncomment the `CODE_SIGN_ENTITLEMENTS` line in that file. The target is iPhone only.
 
 Two parts: `ReceiverKit` is a pure Swift package with the brand-neutral `Receiver` protocol, the Denon driver, a demo receiver and discovery, all unit tested without hardware. `App/` is the SwiftUI app. Adding another brand means writing one more `Receiver`. `tools/fake_avr.py` impersonates a receiver for UI testing without touching a real amp. The app icon is an Icon Composer document at `App/AppIcon.icon`.
 

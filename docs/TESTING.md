@@ -36,6 +36,8 @@ Restore your real address afterwards (`defaults write dev.antoine.SwiftDenon hos
 | `-zone 2` | Start with Zone 2 selected |
 | `-debugStandby YES` | Force the standby screen (layout checks without powering zones) |
 | `-debugLight YES` | Force light appearance |
+| `-debugSettings YES` | iPhone: open the settings sheet at launch |
+| `-debugPage Amp\|Zones\|General` | Settings: start on that page |
 
 Pass with `open build/Build/Products/Debug/SwiftDenon.app --args -zone 2`.
 
