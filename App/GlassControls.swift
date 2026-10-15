@@ -8,22 +8,60 @@ struct GlassCircleButton: View {
     var tint: Color = .accentColor
     var size: CGFloat = 52
     var iconSize: CGFloat?
+    /// Holding the button keeps firing the action, slowly at first and then faster (iPhone).
+    var repeats = false
     let action: () -> Void
+
+    #if os(iOS)
+    @State private var pressed = false
+    @State private var repeating: Task<Void, Never>?
+    #endif
 
     var body: some View {
         #if os(iOS)
         // iOS's glass button style didn't show the tint, so the glass is applied directly.
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: iconSize ?? size * 0.38, weight: .medium))
-                .contentTransition(.symbolEffect(.replace))
-                .frame(width: size, height: size)
-                .foregroundStyle(active ? Color.white : Color.primary)
-                .glassEffect(.regular.tint(active ? tint.opacity(0.7) : nil).interactive(), in: .circle)
+        let label = Image(systemName: symbol)
+            .font(.system(size: iconSize ?? size * 0.38, weight: .medium))
+            .contentTransition(.symbolEffect(.replace))
+            .frame(width: size, height: size)
+            .foregroundStyle(active ? Color.white : Color.primary)
+            .glassEffect(.regular.tint(active ? tint.opacity(0.7) : nil).interactive(), in: .circle)
+        Group {
+            if repeats {
+                // A press steps at once; keeping hold of it carries on stepping, like holding a
+                // volume button. A plain Button can't tell a hold from a tap, so this is a drag.
+                label
+                    .contentShape(.circle)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { g in
+                                if hypot(g.translation.width, g.translation.height) > 60 { stopRepeating(); return }
+                                guard !pressed else { return }
+                                pressed = true
+                                action()
+                                repeating = Task { @MainActor in
+                                    try? await Task.sleep(for: .milliseconds(380))
+                                    var interval = 150
+                                    while !Task.isCancelled {
+                                        action()
+                                        try? await Task.sleep(for: .milliseconds(interval))
+                                        interval = max(50, interval - 8)
+                                    }
+                                }
+                            }
+                            .onEnded { _ in stopRepeating(); pressed = false }
+                    )
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(symbol == "plus" ? "Louder" : "Quieter")
+                    .accessibilityAddTraits(.isButton)
+                    .accessibilityAction(.default, action)
+            } else {
+                Button(action: action) { label }.buttonStyle(.plain)
+            }
         }
-        .buttonStyle(.plain)
         .animation(.snappy, value: active)
         .animation(.snappy, value: symbol)
+        .onDisappear { stopRepeating() }
         #else
         Button(action: action) {
             Image(systemName: symbol)
@@ -39,6 +77,13 @@ struct GlassCircleButton: View {
         .animation(.snappy, value: symbol)
         #endif
     }
+
+    #if os(iOS)
+    private func stopRepeating() {
+        repeating?.cancel()
+        repeating = nil
+    }
+    #endif
 }
 
 /// Capsule volume slider with a glass thumb. The thumb follows the pointer continuously;
@@ -47,6 +92,8 @@ struct GlassCircleButton: View {
 /// Two ways to drag. By default (Mac) pressing the track makes the thumb bounce to the pointer.
 /// With `relative` (iPhone) the thumb stays where it is when touched and then moves exactly as
 /// far as the finger does, so a finger can start anywhere on the slider without anything jumping.
+/// There it also scrubs: the further the finger is from the slider's line, vertically, the less
+/// the thumb moves for each point the finger travels sideways, down to fine adjustments.
 struct GlassSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
@@ -61,6 +108,8 @@ struct GlassSlider: View {
 
     private let thumb: CGFloat = 30
     private let fastSpeed: CGFloat = 350
+    /// Within this distance of the slider's line the thumb tracks the finger one to one.
+    private let fullSpeedZone: CGFloat = 40
     @State private var dragFraction: Double?
     @State private var lastX: CGFloat = 0
     @State private var lastTime: Date = .distantPast
@@ -72,12 +121,20 @@ struct GlassSlider: View {
     /// the cursor. Afterwards it follows the drag on a stiff spring.
     @State private var landing = false
     @State private var pressX: CGFloat = 0
-    @State private var startFraction: Double = 0
+    /// Relative drags add up the finger's movement, scaled by `scrubFactor`.
+    @State private var trackFraction: Double = 0
 
     private var thumbAnimation: Animation? {
         if dragFraction == nil { return .smooth(duration: 0.2) }
         if relative { return nil }   // the thumb is the finger: no lag
         return landing ? .bouncy(duration: 0.55, extraBounce: 0.25) : .interactiveSpring(response: 0.14, dampingFraction: 0.85)
+    }
+
+    /// How much of the finger's sideways movement reaches the thumb: all of it near the slider, then
+    /// falling smoothly (half at ~70 pt away, a quarter at ~210 pt) to a floor for fine control.
+    private func scrubFactor(distance: CGFloat) -> Double {
+        let beyond = max(0, distance - fullSpeedZone)
+        return max(0.05, 1 / (1 + Double(beyond) / 70))
     }
 
     var body: some View {
@@ -104,6 +161,7 @@ struct GlassSlider: View {
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { g in
+                        let previousX = lastX
                         let dt = g.time.timeIntervalSince(lastTime)
                         if dt > 0.3 { speed = 0 }
                         else if dt > 0 { speed = speed * 0.6 + abs(g.location.x - lastX) / dt * 0.4 }
@@ -112,8 +170,12 @@ struct GlassSlider: View {
                         let first = dragFraction == nil
                         let f: Double
                         if relative {
-                            if first { startFraction = valueFraction; pressX = g.location.x }
-                            f = min(1, max(0, startFraction + Double((g.location.x - pressX) / usable)))
+                            if first { trackFraction = valueFraction }
+                            else {
+                                let factor = scrubFactor(distance: abs(g.location.y - geo.size.height / 2))
+                                trackFraction = min(1, max(0, trackFraction + Double((g.location.x - previousX) / usable) * factor))
+                            }
+                            f = trackFraction
                         } else {
                             if first { landing = true; pressX = g.location.x }
                             else if landing, abs(g.location.x - pressX) > 6 { landing = false }
