@@ -5,8 +5,6 @@ import ReceiverKit
 /// Compact controller for the selected zone, built from the same glass controls as the main window.
 struct MenuBarView: View {
     @Environment(ReceiverStore.self) private var store
-    @Environment(\.openWindow) private var openWindow
-    @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
 
     var body: some View {
         let zone = store.zone
@@ -23,7 +21,7 @@ struct MenuBarView: View {
                 }
             }
             .transition(.opacity)
-            footer
+            openButton
         }
         .padding(16)
         .frame(width: 300)
@@ -70,80 +68,42 @@ struct MenuBarView: View {
     }
 
     private func playing(_ zone: Zone) -> some View {
-        VStack(spacing: 16) {
-            if hideVolumeSlider {
-                // No slider: − and + sit either side of the number, as in the main window,
-                // and the buttons move to their own row so the number has room.
-                HStack(spacing: 16) {
-                    GlassCircleButton(symbol: "minus", size: 30) { store.stepVolume(by: -1) }
-                        .opacity(zone.mute ? 0.35 : 1)
-                    volumeNumber(zone).frame(minWidth: 96).scrollsVolume(store)
-                    GlassCircleButton(symbol: "plus", size: 30) { store.stepVolume(by: 1) }
-                        .opacity(zone.mute ? 0.35 : 1)
-                }
-                powerAndMute(zone)
-            } else {
-                HStack {
-                    volumeNumber(zone).scrollsVolume(store)
-                    Spacer(minLength: 0)
-                    powerAndMute(zone)
-                }
-                HStack(spacing: 8) {
-                    GlassCircleButton(symbol: "minus", size: 30) { store.stepVolume(by: -1) }
-                    GlassSlider(
-                        value: Binding(get: { zone.volume }, set: { store.setVolume($0) }),
-                        range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
-                        onEnd: { store.setVolume(zone.volume, final: true) }
-                    )
+        VStack(spacing: 18) {
+            // No slider here: − and + sit either side of the number, as in the window's sliderless layout.
+            HStack(spacing: 16) {
+                GlassCircleButton(symbol: "minus", size: 30) { store.stepVolume(by: -1) }
+                    .opacity(zone.mute ? 0.35 : 1)
+                VolumeReadout(volume: zone.volume, halfSteps: store.useHalfSteps, size: 44, muted: zone.mute)
+                    .frame(minWidth: 110)
                     .scrollsVolume(store)
-                    GlassCircleButton(symbol: "plus", size: 30) { store.stepVolume(by: 1) }
-                }
-                .opacity(zone.mute ? 0.35 : 1)
+                GlassCircleButton(symbol: "plus", size: 30) { store.stepVolume(by: 1) }
+                    .opacity(zone.mute ? 0.35 : 1)
             }
-            InputPicker()
+            // Source on the left, mute and power on the right.
+            HStack(spacing: 10) {
+                InputPicker()
+                Spacer(minLength: 8)
+                GlassEffectContainer(spacing: 10) {
+                    HStack(spacing: 10) {
+                        GlassCircleButton(symbol: zone.mute ? "speaker.slash.fill" : "speaker.wave.2.fill",
+                                          active: zone.mute, tint: .orange, size: 34) { store.toggleMute() }
+                        GlassCircleButton(symbol: "power", active: true, tint: .green, size: 34) { store.setPower(false) }
+                    }
+                }
+            }
         }
         .animation(.smooth(duration: 0.3), value: zone.mute)
     }
 
-    private func powerAndMute(_ zone: Zone) -> some View {
-        GlassEffectContainer(spacing: 10) {
-            HStack(spacing: 10) {
-                GlassCircleButton(symbol: zone.mute ? "speaker.slash.fill" : "speaker.wave.2.fill",
-                                  active: zone.mute, tint: .orange, size: 36) { store.toggleMute() }
-                GlassCircleButton(symbol: "power", active: true, tint: .green, size: 36) { store.setPower(false) }
-            }
+    private var openButton: some View {
+        Button(action: AppWindows.showRemote) {
+            Text("Open SwiftDenon")
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
         }
-    }
-
-    private func volumeNumber(_ zone: Zone) -> some View {
-        Text(zone.volume.formatted(.number.precision(store.useHalfSteps ? .fractionLength(1) : .fractionLength(0...1))))
-            .font(.system(size: 44, weight: .semibold, design: .rounded))
-            .monospacedDigit()
-            .contentTransition(.numericText(value: zone.volume))
-            .animation(.snappy(duration: 0.25), value: zone.volume)
-            .opacity(zone.mute ? 0.3 : 1)
-    }
-
-    private var footer: some View {
-        HStack {
-            Button("Open SwiftDenon", action: showRemote)
-            Spacer()
-            Button("Quit") { NSApp.terminate(nil) }
-        }
-        .buttonStyle(.borderless)
-        .foregroundStyle(.secondary)
-        .font(.callout)
-        .padding(.top, 2)
-    }
-
-    /// Brings the remote window forward, or reopens it if it was closed.
-    private func showRemote() {
-        NSApp.activate()
-        if let window = NSApp.windows.first(where: { $0.identifier?.rawValue.hasPrefix(SwiftDenonApp.remoteWindowID) == true }) {
-            window.makeKeyAndOrderFront(nil)
-        } else {
-            openWindow(id: SwiftDenonApp.remoteWindowID)
-        }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.capsule)
     }
 }
 #endif

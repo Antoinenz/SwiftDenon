@@ -140,8 +140,9 @@ struct VerticalGlassSlider: View {
     }
 }
 
-/// A segmented control drawn as one glass capsule with a sliding selection,
-/// used for the settings pages and the menu bar's zone picker.
+/// A segmented control with the proportions and look of the toolbar's: a glass track, equal-width
+/// segments, and a soft thumb that slides to the selection. A popover has no toolbar to supply
+/// that glass, so the menu bar's zone picker is built from it.
 struct GlassSegmented<Option: Hashable, Label: View>: View {
     @Binding var selection: Option
     let options: [Option]
@@ -153,14 +154,15 @@ struct GlassSegmented<Option: Hashable, Label: View>: View {
             ForEach(options, id: \.self) { option in
                 Button { withAnimation(.snappy(duration: 0.3)) { selection = option } } label: {
                     label(option)
-                        .font(.body.weight(.medium))
-                        .foregroundStyle(selection == option ? .primary : .secondary)
-                        .padding(.horizontal, 16)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                        .padding(.horizontal, 10)
                         .padding(.vertical, 6)
+                        .frame(maxWidth: .infinity)
                         .background {
                             if selection == option {
-                                Capsule().fill(.clear)
-                                    .glassEffect(.regular.interactive(), in: .capsule)
+                                Capsule().fill(.primary.opacity(0.2))
                                     .matchedGeometryEffect(id: "selection", in: ns)
                             }
                         }
@@ -169,7 +171,7 @@ struct GlassSegmented<Option: Hashable, Label: View>: View {
                 .buttonStyle(.plain)
             }
         }
-        .padding(4)
+        .padding(3)
         .glassEffect(.regular, in: .capsule)
     }
 }
