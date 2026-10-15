@@ -177,6 +177,15 @@ final class ReceiverStore {
         setVolume(min(z.maxVolume, max(0, z.volume + delta)), final: true)
     }
 
+    /// Volume change from scrolling. Steps are throttled like slider drags; `final` always sends.
+    /// With zero steps and `final`, it just sends the current value so the receiver lands there.
+    func scrollVolume(by steps: Double, final: Bool) {
+        let z = zone
+        guard state.connected, z.power else { return }
+        let unit = useHalfSteps ? 0.5 : 1.0
+        setVolume(min(z.maxVolume, max(0, z.volume + steps * unit)), final: final)
+    }
+
     func togglePower() {
         guard state.connected else { return }
         setPower(!zone.power)

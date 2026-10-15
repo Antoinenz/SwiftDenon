@@ -112,7 +112,7 @@ struct RemoteView: View {
                 HStack(spacing: 20) {
                     GlassCircleButton(symbol: "minus", size: 40) { store.stepVolume(by: -1) }
                         .opacity(zone.mute ? 0.35 : 1)
-                    volumeNumber(zone).frame(minWidth: 150)
+                    volumeNumber(zone).frame(minWidth: 150).scrollsVolume(store)
                     GlassCircleButton(symbol: "plus", size: 40) { store.stepVolume(by: 1) }
                         .opacity(zone.mute ? 0.35 : 1)
                 }
@@ -121,6 +121,8 @@ struct RemoteView: View {
                 .padding(.bottom, 4)
             } else {
                 volumeNumber(zone)
+                    .frame(maxWidth: .infinity)
+                    .scrollsVolume(store)
                     .padding(.top, 22)
                     .padding(.bottom, 10)
                 HStack(spacing: 12) {
@@ -130,6 +132,7 @@ struct RemoteView: View {
                         range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
                         onEnd: { store.setVolume(zone.volume, final: true) }
                     )
+                    .scrollsVolume(store)
                     GlassCircleButton(symbol: "plus", size: 40) { store.stepVolume(by: 1) }
                 }
                 .opacity(zone.mute ? 0.35 : 1)

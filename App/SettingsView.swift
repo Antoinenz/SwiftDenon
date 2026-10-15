@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var manualHost = ""
     @AppStorage("halfStepVolume") private var halfStepVolume = false
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
+    @AppStorage("scrollChangesVolume") private var scrollChangesVolume = false
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
     @AppStorage("showInMenuBar") private var showInMenuBar = true
     @AppStorage("hideMenuBarWhenAway") private var hideMenuBarWhenAway = false
@@ -100,10 +101,19 @@ struct SettingsView: View {
 
     @ViewBuilder private var generalPage: some View {
         let s = store.state
-        Section("Volume") {
+        Section {
             Toggle("Half-step volume", isOn: $halfStepVolume)
                 .disabled(!s.zones.contains(where: \.halfStep))
             Toggle("Hide volume slider", isOn: $hideVolumeSlider)
+            #if os(macOS)
+            Toggle("Scroll to change volume", isOn: $scrollChangesVolume)
+            #endif
+        } header: {
+            Text("Volume")
+        } footer: {
+            #if os(macOS)
+            Text("Scroll or swipe over the volume number or slider, in the window or the menu bar.")
+            #endif
         }
         Section {
             Toggle("Arrow keys switch zones", isOn: $arrowKeysSwitchZones)

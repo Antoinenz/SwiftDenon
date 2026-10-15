@@ -77,14 +77,14 @@ struct MenuBarView: View {
                 HStack(spacing: 16) {
                     GlassCircleButton(symbol: "minus", size: 30) { store.stepVolume(by: -1) }
                         .opacity(zone.mute ? 0.35 : 1)
-                    volumeNumber(zone).frame(minWidth: 96)
+                    volumeNumber(zone).frame(minWidth: 96).scrollsVolume(store)
                     GlassCircleButton(symbol: "plus", size: 30) { store.stepVolume(by: 1) }
                         .opacity(zone.mute ? 0.35 : 1)
                 }
                 powerAndMute(zone)
             } else {
                 HStack {
-                    volumeNumber(zone)
+                    volumeNumber(zone).scrollsVolume(store)
                     Spacer(minLength: 0)
                     powerAndMute(zone)
                 }
@@ -95,6 +95,7 @@ struct MenuBarView: View {
                         range: 0...zone.maxVolume, halfStep: store.useHalfSteps,
                         onEnd: { store.setVolume(zone.volume, final: true) }
                     )
+                    .scrollsVolume(store)
                     GlassCircleButton(symbol: "plus", size: 30) { store.stepVolume(by: 1) }
                 }
                 .opacity(zone.mute ? 0.35 : 1)
