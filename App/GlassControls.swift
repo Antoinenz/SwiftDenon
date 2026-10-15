@@ -140,38 +140,70 @@ struct VerticalGlassSlider: View {
     }
 }
 
-/// A segmented control with the proportions and look of the toolbar's: a glass track, equal-width
-/// segments, and a soft thumb that slides to the selection. A popover has no toolbar to supply
-/// that glass, so the menu bar's zone picker is built from it.
+/// A segmented control that behaves like the toolbar's. At rest the selection is a soft pill on a
+/// glass track; pressing it lifts the pill into a glass lens that swells past the track and
+/// follows the pointer, changing the selection as it passes over each segment. A popover has no
+/// toolbar to supply the real one, so the menu bar's zone picker is built from this.
 struct GlassSegmented<Option: Hashable, Label: View>: View {
     @Binding var selection: Option
     let options: [Option]
     @ViewBuilder let label: (Option) -> Label
-    @Namespace private var ns
+
+    @State private var pressed = false
+    @State private var segmentWidth: CGFloat = 0
+    private let inset: CGFloat = 3
+    private let height: CGFloat = 28
+
+    private var index: Int { options.firstIndex(of: selection) ?? 0 }
 
     var body: some View {
-        HStack(spacing: 0) {
-            ForEach(options, id: \.self) { option in
-                Button { withAnimation(.snappy(duration: 0.3)) { selection = option } } label: {
-                    label(option)
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.primary)
-                        .lineLimit(1)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .frame(maxWidth: .infinity)
-                        .background {
-                            if selection == option {
-                                Capsule().fill(.primary.opacity(0.2))
-                                    .matchedGeometryEffect(id: "selection", in: ns)
-                            }
-                        }
-                        .contentShape(.capsule)
+        ZStack(alignment: .leading) {
+            thumb
+            HStack(spacing: 0) {
+                ForEach(options, id: \.self) { option in
+                    // All labels stacked (hidden) so every segment is as wide as the widest one.
+                    ZStack {
+                        ForEach(options, id: \.self) { label($0).hidden() }
+                        label(option)
+                    }
+                    .font(.system(size: 13, weight: .medium))
+                    .lineLimit(1)
+                    .padding(.horizontal, 14)
+                    .frame(height: height)
                 }
-                .buttonStyle(.plain)
+            }
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { segmentWidth = $0 / CGFloat(max(1, options.count)) }
+        }
+        .padding(inset)
+        .glassEffect(.regular, in: .capsule)
+        .contentShape(.capsule)
+        .gesture(
+            DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                .onChanged { g in
+                    pressed = true
+                    guard segmentWidth > 0 else { return }
+                    let i = min(options.count - 1, max(0, Int((g.location.x - inset) / segmentWidth)))
+                    if options[i] != selection {
+                        Haptics.tick()
+                        selection = options[i]
+                    }
+                }
+                .onEnded { _ in pressed = false }
+        )
+        .animation(.bouncy(duration: 0.4, extraBounce: 0.1), value: index)
+        .animation(.smooth(duration: 0.2), value: pressed)
+    }
+
+    @ViewBuilder private var thumb: some View {
+        Group {
+            if pressed {
+                Capsule().fill(.clear).glassEffect(.regular.interactive(), in: .capsule)
+            } else {
+                Capsule().fill(.primary.opacity(0.2))
             }
         }
-        .padding(3)
-        .glassEffect(.regular, in: .capsule)
+        .frame(width: segmentWidth, height: height)
+        .scaleEffect(pressed ? 1.18 : 1)
+        .offset(x: CGFloat(index) * segmentWidth)
     }
 }
