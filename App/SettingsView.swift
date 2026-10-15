@@ -44,6 +44,10 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+        #if os(macOS)
+        // Same window treatment as the remote, so the toolbar glass sits on the same material.
+        .containerBackground(.ultraThinMaterial, for: .window)
+        #endif
         .toolbar(removing: .title)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -52,7 +56,7 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.segmented)
                 .labelsHidden()
-                .frame(width: 220)
+                .fixedSize()
             }
         }
     }

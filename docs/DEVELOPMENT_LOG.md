@@ -222,6 +222,10 @@ User: *"volume scroll works, but theres no haptic on scroll. also set the half s
 
 User sent a screenshot: the switcher sat on its own row below the traffic lights. The `Settings` scene gives a preferences-style two-row title bar, so settings became a plain `Window` scene with a `Commands` entry for ⌘,. The switcher is now level with the traffic lights, as in the main window.
 
+## 30. Settings switcher spacing
+
+User, after two rounds of "still not right" with the main window's picker as the reference: it was the spacing around each option, not the glass. A fixed 220 pt frame left empty track at the right end and cramped "General". The picker now sizes to its labels (same 8 px inset around the selected pill as the zone picker), and the window shares the remote's material. Lesson: compare the two bars cropped at the same scale before declaring a match.
+
 ---
 
 ## Testing notes that shaped the work
