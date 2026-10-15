@@ -209,6 +209,15 @@ User: *"update the menu bar icon to match the app icon, except can you make the 
   - The hidden item never returned. SwiftUI calls the `isInserted` setter with `false` on every hide, and writing that to `showInMenuBar` overwrote the user's preference. The setter is now empty. This also cost a long detour: a theory about macOS's `NSStatusItem Visible…` flag, tried and removed.
 - *"a setting to allow scrolling on the volume number and slider to change the volume"*: `Scroll to change volume`, off by default. Checked with synthetic pixel scrolls: down lowers, up raises. The mouse-wheel path wasn't verified cleanly because the volume was being changed by hand during the test.
 
+## 28. Settings as a window, and smaller fixes
+
+User: *"volume scroll works, but theres no haptic on scroll. also set the half step volume setting to on by default. hide the zone selector when disconnected from the amp and displaying the loading spinner. the top menu bar in the settings page still isnt an actual liquid glass element."*
+
+- Scrolling the volume now ticks the trackpad haptic on every step that moves it.
+- Half-step volume defaults to on (registered at launch; an existing saved choice is kept).
+- The zone picker is hidden until the receiver is connected.
+- Third attempt at the settings bar. Checked properly this time: a sheet with a `NavigationStack` puts `Done` in a bottom bar and drops the principal item, so no sheet can have a top glass toolbar. Settings is now a `Settings` scene (a normal window) with a native segmented picker in the toolbar, which is the same glass as the main window's zone picker. The hand-built bar and Done button are gone from the macOS path; `GlassSegmented` stays for the menu bar.
+
 ---
 
 ## Testing notes that shaped the work

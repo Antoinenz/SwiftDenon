@@ -23,7 +23,7 @@ It finds your receiver on the network by itself and keeps a live connection to i
 - **Every zone**: Main, Zone 2 and Zone 3, each with its own power, volume, mute and input, with names you choose
 - **Your inputs, your names**: input names and hidden inputs come straight from the receiver's setup
 - **Instant feedback**: controls react immediately and reconcile with the amp, so nothing jumps back while the receiver catches up
-- **Smooth volume**: a glass slider that follows your pointer, with optional 0.5 dB half steps on zones that support them, and optional scrolling over the number or slider
+- **Smooth volume**: a glass slider that follows your pointer, with 0.5 dB half steps on zones that support them, and optional scrolling over the number or slider
 - **Sound settings**: sound mode, dynamic EQ, bass, treble and subwoofer faders, sleep timer
 - **Hides when you're out**: optionally removes the menu bar item when your receiver can't be reached, and brings it back when you're home
 - **Menu bar controller**: zones, power, volume, mute and input from the menu bar, with an icon that is a live volume dial
@@ -61,7 +61,7 @@ Developed and tested against a Denon AVR-X2700H. Other Denon and Marantz receive
 | **Drag** the slider | Set the volume. Fast drags skip half steps |
 | **Click** the zone picker | Switch between zones |
 | **Click** the input name | Pick an input |
-| **Click** the gear | Settings: Amp, Zones and General |
+| **Click** the gear, or **⌘,** | Settings: Amp, Zones and General |
 
 Turn on **Settings → General → Arrow keys switch zones** to swap them: ←/→ then switch zones and Tab steps through inputs. If you'd rather not have a slider at all, **Hide volume slider** puts − and + either side of the number. **Scroll to change volume** lets the scroll wheel or a two-finger swipe over the number or slider change the volume, in the window and the menu bar.
 

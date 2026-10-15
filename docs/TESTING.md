@@ -43,6 +43,7 @@ Pass with `open build/Build/Products/Debug/SwiftDenon.app --args -zone 2`.
 
 - Find the app's window id with `CGWindowListCopyWindowInfo` and capture with `screencapture -x -o -l <id> out.png`.
 - Animation checks: poll the window bounds at ~8 ms from another process and print height changes (showed that growing jumped while shrinking animated), or capture a burst of frames and compare luminance regions (used to confirm the mute fade and that label text never goes darker than the background during a transition).
+- Settings is its own window: open it with the gear (or `click` at window position + (354, 26)) and capture the topmost window, which `shot.sh` does, since the settings window is listed before the remote.
 - Menu bar panel: it only opens for a real click, not an Accessibility `click`, so post a `CGEvent` mouse down/up on the item's position (`get position of menu bar item 1 of menu bar 2`). The panel is the app's window at layer 101.
 - "Away from home" for the menu bar: run the fake receiver, launch the app with `-demoMode NO -host 127.0.0.1:2323 -hideMenuBarWhenAway YES`, then kill the fake. The icon should disappear after about 10 s and come back after restarting it. Don't pass `-showInMenuBar`: a launch argument overrides the stored value and hid the bug this setting once had (the SwiftUI setter overwriting the preference).
 - Scroll: `CGEvent(scrollWheelEvent2Source:…)` posted at the window with the pointer over the number works when the setting is on (`-scrollChangesVolume YES`). Pixel units exercise the trackpad path, line units the mouse-wheel path.
@@ -69,8 +70,8 @@ Use `--rendition Dark` for dark mode.
 - Arrow keys switch zones on: ←/→ switch zones, Tab cycles inputs.
 - Hide volume slider on: − number + in one row, all fade when muted.
 - Keyboard: ←/→ cycle inputs (wrapping, ignored when the zone is off), P toggles power, M/Space mute, 1/2/3 and Tab switch zones.
-- Disconnected or single zone: gear stays top right, no empty glass pill.
+- Disconnected (try `-host 127.0.0.1:2399`) or single zone: gear stays top right, no zone picker and no empty glass pill.
 - Scroll to change volume on: scrolling over the number or slider changes it in the window and the menu bar; off, nothing happens. Up is louder.
 - Hide when away on: icon disappears ~10 s after the receiver goes away and returns when it is back; *Show in menu bar* stays on in Settings throughout.
 - Menu bar: zone switcher, volume, mute, power and input all mirror the window; standby shows one power button; icon dial follows the volume and eases rather than jumps; ring when off, slash when muted; *Open SwiftDenon* reopens a closed window; *Show in menu bar* off removes it.
-- Settings: Amp / Zones / General pages switch; demo mode toggles without touching the saved host.
+- Settings opens as a window with a native glass switcher; pages switch; demo mode toggles without touching the saved host.
