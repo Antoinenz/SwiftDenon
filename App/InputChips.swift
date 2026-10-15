@@ -36,6 +36,9 @@ struct InputPicker: View {
             }
             .padding(8)
             .frame(minWidth: 220)
+            #if os(iOS)
+            .presentationCompactAdaptation(.popover)   // a popover, not a sheet, on iPhone
+            #endif
         }
     }
 }

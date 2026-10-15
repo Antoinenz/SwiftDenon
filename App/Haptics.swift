@@ -4,7 +4,8 @@ import AppKit
 import UIKit
 #endif
 
-/// Slider detents only: trackpad haptics on Mac, Taptic Engine on iPhone. Buttons rely on the trackpad's own click.
+/// Slider detents: trackpad haptics on Mac, Taptic Engine on iPhone. On the Mac, buttons rely on the
+/// trackpad's own click; on iPhone `tap()` gives them a soft knock.
 @MainActor
 enum Haptics {
     static func tick() {
@@ -12,6 +13,13 @@ enum Haptics {
         NSHapticFeedbackManager.defaultPerformer.perform(.levelChange, performanceTime: .now)
         #else
         UISelectionFeedbackGenerator().selectionChanged()
+        #endif
+    }
+
+    /// A soft knock for buttons on iPhone; the Mac's trackpad already clicks.
+    static func tap() {
+        #if os(iOS)
+        UIImpactFeedbackGenerator(style: .soft).impactOccurred()
         #endif
     }
 }

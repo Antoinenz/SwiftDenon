@@ -118,6 +118,13 @@ final class ReceiverStore {
         pathMonitor = monitor
     }
 
+    /// Back in the foreground after `seconds` away. iOS suspends the app and the socket usually dies
+    /// without telling us, so reconnect unless we were only gone for a moment.
+    func resume(awayFor seconds: TimeInterval) {
+        guard !demoMode, !host.isEmpty || !state.connected else { return }
+        if !state.connected || seconds > 20 { start() }
+    }
+
     func select(host newHost: String) {
         host = newHost
         UserDefaults.standard.set(newHost, forKey: "host")

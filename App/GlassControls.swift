@@ -11,6 +11,20 @@ struct GlassCircleButton: View {
     let action: () -> Void
 
     var body: some View {
+        #if os(iOS)
+        // iOS's glass button style didn't show the tint, so the glass is applied directly.
+        Button(action: action) {
+            Image(systemName: symbol)
+                .font(.system(size: iconSize ?? size * 0.38, weight: .medium))
+                .contentTransition(.symbolEffect(.replace))
+                .frame(width: size, height: size)
+                .foregroundStyle(active ? Color.white : Color.primary)
+                .glassEffect(.regular.tint(active ? tint.opacity(0.7) : nil).interactive(), in: .circle)
+        }
+        .buttonStyle(.plain)
+        .animation(.snappy, value: active)
+        .animation(.snappy, value: symbol)
+        #else
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: iconSize ?? size * 0.38, weight: .medium))
@@ -23,6 +37,7 @@ struct GlassCircleButton: View {
         .tint(active ? tint.opacity(0.7) : nil)
         .animation(.snappy, value: active)
         .animation(.snappy, value: symbol)
+        #endif
     }
 }
 
