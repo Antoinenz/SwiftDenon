@@ -27,7 +27,7 @@ It finds your receiver on the network by itself and keeps a live connection to i
 - **Sound settings**: sound mode, dynamic EQ, bass, treble and subwoofer faders, sleep timer
 - **Hides when you're out**: optionally removes the menu bar item when your receiver can't be reached, and brings it back when you're home
 - **Menu bar controller**: zones, `−` volume `+`, input, mute and power from the menu bar, with an icon that is a live volume dial and a right-click menu (Open, Settings…, Mute, Power, Quit)
-- **iPhone app**: the same glass controls laid out for one hand, a relative slider that moves exactly with your finger, swipe to change zone, and your iPhone's volume buttons controlling the amp while the app is open
+- **iPhone app**: the same glass controls laid out for one hand, a relative slider that moves exactly with your finger, swipe to change zone or up from the bottom for inputs, slower scrubbing the further your finger drifts from the slider, hold − or + to keep stepping, and your iPhone's volume buttons controlling the amp while the app is open
 - **iCloud sync**: zone names follow you between devices (needs an iCloud-capable signing team, see Development)
 - **Shortcuts**: power, volume, mute and input actions
 - **Demo mode**: try everything against a simulated receiver, no amp needed
@@ -73,7 +73,7 @@ Zone names live in the app, because receivers don't expose them over the network
 
 ### On iPhone
 
-Same controls, laid out for one hand: the number in the middle, the slider and the buttons in the lower half, the zone switcher and settings in the navigation bar's glass. Swipe sideways to change zone. With **Settings → General → Use volume buttons** (on by default) your iPhone's volume buttons change the receiver's volume while the app is open and the receiver is on, and your phone's own volume is put back when you leave. The slider is relative: put a finger anywhere on it and it moves exactly as far as you do, without jumping. The app reconnects by itself when you come back to it. Zone names sync between your devices through iCloud when the app is signed with an iCloud-capable (paid) developer account.
+Same controls, laid out for one hand: the number in the middle, the slider and the buttons in the lower half, the zone switcher and settings in the navigation bar's glass. Swipe sideways to change zone. With **Settings → General → Use volume buttons** (on by default) your iPhone's volume buttons change the receiver's volume while the app is open and the receiver is on, and your phone's own volume is put back when you leave. The slider is relative: put a finger anywhere on it and it moves exactly as far as you do, without jumping. Slide your finger away from the slider, up or down, while dragging and the thumb slows down for finer control (half speed about 70 pt away, a quarter at about 210 pt). Swipe up from the bottom third of the screen to open the input list, and hold − or + to keep stepping. The app reconnects by itself when you come back to it. Zone names sync between your devices through iCloud when the app is signed with an iCloud-capable (paid) developer account.
 
 ## How it talks to your receiver
 

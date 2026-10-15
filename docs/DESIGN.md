@@ -15,7 +15,9 @@
 - Playing: the number at 112 pt in the middle, then `−` slider `+`, then, in the thumb's reach, power and mute at 80 pt and the input pill. Standby is one 120 pt power button and the zone's name. Connecting is a spinner, with no zone switcher.
 - With *Hide volume slider* on, `−` number `+` is one row at 76 pt.
 - Buttons give a soft haptic knock (the Mac's trackpad clicks for itself); slider detents and volume-button steps use the selection tick.
-- Swipe sideways anywhere that isn't a control to change zone.
+- Swipe sideways anywhere that isn't a control to change zone. Swipe up from the bottom third of the screen to open the input list (a drag that starts on the slider belongs to the slider).
+- The slider scrubs like the ones in video and music apps: level with the slider the thumb follows the finger one to one, and the further the finger is above or below it the less the thumb moves for the same sideways travel (half speed about 70 pt away, a quarter at about 210 pt, with a floor for fine adjustment). The factor falls smoothly rather than in steps, so nothing lurches as the finger crosses a boundary.
+- − and + step once when pressed; holding one carries on after a short pause and speeds up, like holding a volume button.
 - Volume buttons: see ARCHITECTURE. The number is the feedback, so the system volume overlay is suppressed.
 
 ## Layout (macOS)

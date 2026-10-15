@@ -256,6 +256,16 @@ User built it on their iPhone after fixing signing ("wow that looks wonderful"),
 - `CloudSettings` mirrors `zoneNames` through `NSUbiquitousKeyValueStore`. A free Personal Team can't sign with the iCloud entitlement, so the entitlement is opt-in through the git-ignored `project.local.yml` and the code does nothing without it.
 - Not tested: iCloud across devices, the slider on a real finger after this change.
 
+## 34. Swipe up for inputs, hold to repeat, scrubbing
+
+User, now allowing screenshots of the iPhone app: swiping up on the bottom third of the screen (not while the slider is selected) should open the input selector; the in-app − and + should repeat when held, like the volume buttons; and the slider should scrub like professional apps, tracking at full speed when the finger is level with the slider and more slowly the further down it goes.
+
+- Swipe up joins the sideways zone swipe in one drag gesture on the navigation stack, so a drag that starts on the slider still belongs to the slider. `InputPicker` gained an optional `isOpen` binding.
+- Hold to repeat: SwiftUI's `buttonRepeatBehavior(.enabled)` worked but only gave 5 steps in 2.5 s, too slow for volume, so `GlassCircleButton` has a `repeats` mode that steps at once and then accelerates (22 steps in 2.5 s in the test).
+- Scrubbing: the relative slider accumulates movement scaled by a smooth function of the vertical distance from the slider (full speed within 40 pt). The same sideways drag changed the volume by 40 level with the slider and 23 while moving down 0.25 of the screen height.
+- First time the gestures could be tested without touching the user's Mac: a UI test target (`UITests/`, XCUITest in the simulator, demo mode). It checks all of the above, including that the middle of the screen doesn't open the inputs and that a tap still steps by one.
+- Not verified: how it feels under a real finger (the factor curve and the 380 ms hold delay are guesses), and the hardware volume buttons' own hold-to-repeat, which is whatever iOS does.
+
 ---
 
 ## Testing notes that shaped the work
