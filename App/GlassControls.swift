@@ -75,7 +75,11 @@ struct GlassSlider: View {
                         let raw = range.lowerBound + Double(f) * (range.upperBound - range.lowerBound)
                         let snapped = halfStep && speed < fastSpeed ? (raw * 2).rounded() / 2 : raw.rounded()
                         if snapped != value { value = snapped }
-                        if Int(snapped) != lastWhole { lastWhole = Int(snapped); Haptics.tick() }
+                        // The press itself is silent; only crossing values while dragging ticks.
+                        if Int(snapped) != lastWhole {
+                            if lastWhole >= 0 { Haptics.tick() }
+                            lastWhole = Int(snapped)
+                        }
                     }
                     .onEnded { _ in
                         speed = 0; lastTime = .distantPast; lastWhole = -1
