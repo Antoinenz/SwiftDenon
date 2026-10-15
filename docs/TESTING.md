@@ -68,5 +68,5 @@ Use `--rendition Dark` for dark mode.
 - Hide volume slider on: − number + in one row, all fade when muted.
 - Keyboard: ←/→ cycle inputs (wrapping, ignored when the zone is off), P toggles power, M/Space mute, 1/2/3 and Tab switch zones.
 - Disconnected or single zone: gear stays top right, no empty glass pill.
-- Menu bar: zone switcher, volume, mute, power and input all mirror the window; standby shows one power button; icon filled/outlined/crossed out; *Open SwiftDenon* reopens a closed window; *Show in menu bar* off removes it.
+- Menu bar: zone switcher, volume, mute, power and input all mirror the window; standby shows one power button; icon dial follows the volume and eases rather than jumps; ring when off, slash when muted; *Open SwiftDenon* reopens a closed window; *Show in menu bar* off removes it.
 - Settings: Amp / Zones / General pages switch; demo mode toggles without touching the saved host.

@@ -26,7 +26,7 @@
 - **Zone names cap at 12 characters** so the segmented control fits the toolbar between the traffic lights and the gear; longer names collapsed the toolbar into an overflow menu.
 - **Window height is animated manually**, both directions, because SwiftUI/AppKit resizing jumped (see ARCHITECTURE.md).
 - **No manual IP by default.** The app scans the subnet and connects. A manual address (optionally `host:port`) remains in Settings for odd networks.
-- **The menu bar icon carries state.** Filled when the selected zone is playing, outlined when it's off or disconnected, crossed out when muted, so a glance at the menu bar answers "is it on?".
+- **The menu bar icon is the app icon, and it carries state.** The dial's indicator and lit ticks follow the volume; a ring means off or disconnected, a slash means muted. A glance at the menu bar answers "is it on, and how loud?". Drawn as a template image so the system tints it; dots are slightly larger than in the app icon so they survive at 18 pt.
 - **EQ as faders.** The amp only exposes bass, treble and sub, so those are drawn as three vertical glass faders rather than a pretend multi-band EQ.
 
 ## Reference apps

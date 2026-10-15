@@ -191,6 +191,15 @@ The menu bar panel was still the first draft: a system slider with tick marks (f
 - `stepVolume(by:)` moved into the store and `GlassSegmented` into `GlassControls.swift`, both now shared.
 - Checked in demo mode; the hidden-slider layout via `-hideVolumeSlider YES` so the saved setting wasn't touched.
 
+## 26. Menu bar icon is the dial
+
+User: *"update the menu bar icon to match the app icon, except can you make the app icon animated to match the actual volume setting"* (the second "app icon" read as the menu bar one).
+
+- `MenuBarDial` redraws the app icon's dial as a template image, using the same geometry. Ticks are a little larger so they survive at 18 pt.
+- The indicator angle and lit ticks follow `volume / maxVolume`. Off is a ring, muted gets a slash.
+- A menu bar label can't animate itself, so `MenuBarIconModel` eases between values and swaps the image.
+- Checked by capturing frames after a slider jump in demo mode: three distinct frames, then it settles. 70 renders the same pose as the app icon.
+
 ---
 
 ## Testing notes that shaped the work
