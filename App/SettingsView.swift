@@ -11,6 +11,7 @@ struct SettingsView: View {
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
     @AppStorage("showInMenuBar") private var showInMenuBar = true
+    @AppStorage("hideMenuBarWhenAway") private var hideMenuBarWhenAway = false
 
     private enum Page: String, CaseIterable, Identifiable {
         case amp = "Amp", zones = "Zones", general = "General"
@@ -116,10 +117,14 @@ struct SettingsView: View {
         #if os(macOS)
         Section {
             Toggle("Show in menu bar", isOn: $showInMenuBar)
+            Toggle("Hide when away from the receiver", isOn: $hideMenuBarWhenAway)
+                .disabled(!showInMenuBar)
         } header: {
             Text("Menu Bar")
         } footer: {
-            Text("A compact controller for the selected zone.")
+            Text(hideMenuBarWhenAway
+                 ? "The icon disappears when the receiver can't be reached, such as when you're out, and returns once it connects."
+                 : "A compact controller for the selected zone.")
         }
         #endif
         Section {

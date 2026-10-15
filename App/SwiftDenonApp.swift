@@ -7,6 +7,7 @@ struct SwiftDenonApp: App {
     #if os(macOS)
     @State private var menuBarIcon: MenuBarIconModel
     @AppStorage("showInMenuBar") private var showInMenuBar = true
+    @AppStorage("hideMenuBarWhenAway") private var hideMenuBarWhenAway = false
     #endif
 
     init() {
@@ -21,7 +22,7 @@ struct SwiftDenonApp: App {
         WindowGroup(id: Self.remoteWindowID) {
             RemoteView()
                 .environment(store)
-                .task { store.start() }
+                .task { store.start(); store.watchNetwork() }
                 #if DEBUG
                 .preferredColorScheme(UserDefaults.standard.bool(forKey: "debugLight") ? .light : nil)   // `-debugLight YES`
                 #endif
@@ -32,7 +33,12 @@ struct SwiftDenonApp: App {
         #endif
 
         #if os(macOS)
-        MenuBarExtra(isInserted: $showInMenuBar) {
+        // Read here so the scene updates when the receiver appears or goes away.
+        let inserted = showInMenuBar && (!hideMenuBarWhenAway || menuBarIcon.reachable)
+        // The setter is deliberately empty: SwiftUI reports `false` whenever the item is hidden,
+        // including when we hide it for being away, and writing that back would overwrite the
+        // user's "Show in menu bar" preference.
+        MenuBarExtra(isInserted: Binding(get: { inserted }, set: { _ in })) {
             MenuBarView().environment(store)
         } label: {
             Image(nsImage: menuBarIcon.image)

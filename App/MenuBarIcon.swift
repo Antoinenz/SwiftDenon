@@ -75,12 +75,18 @@ enum MenuBarDial {
 @MainActor @Observable
 final class MenuBarIconModel {
     private(set) var image = MenuBarDial.image(fraction: 0, mode: .off)
+    /// True while the receiver is connected, and for a short grace period after it drops or at
+    /// launch, so a brief blip doesn't make the menu bar item vanish.
+    private(set) var reachable = true
 
     private let store: ReceiverStore
     private var displayed = 0.0
     private var mode = MenuBarDial.Mode.off
     private var animation: Task<Void, Never>?
     private var watcher: Task<Void, Never>?
+    private var reachability: Task<Void, Never>?
+    private var hideTask: Task<Void, Never>?
+    private static let awayGrace = Duration.seconds(10)
 
     init(store: ReceiverStore) {
         self.store = store
@@ -91,6 +97,20 @@ final class MenuBarIconModel {
                 return Target(fraction: z.maxVolume > 0 ? z.volume / z.maxVolume : 0, mode: mode)
             }
             for await target in changes { self?.move(to: target) }
+        }
+        reachability = Task { [weak self] in
+            for await connected in Observations({ store.state.connected }) {
+                guard let self else { return }
+                self.hideTask?.cancel()
+                if connected {
+                    self.reachable = true
+                } else {
+                    self.hideTask = Task { [weak self] in
+                        try? await Task.sleep(for: Self.awayGrace)
+                        if !Task.isCancelled { self?.reachable = false }
+                    }
+                }
+            }
         }
     }
 
