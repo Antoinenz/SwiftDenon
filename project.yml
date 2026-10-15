@@ -38,6 +38,17 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: UIInterfaceOrientationPortrait
         ENABLE_APP_SANDBOX: YES
         ENABLE_OUTGOING_NETWORK_CONNECTIONS: YES
+  SwiftDenonUITests:
+    type: bundle.ui-testing
+    supportedDestinations: [iOS]
+    sources: [UITests]
+    dependencies:
+      - target: SwiftDenon
+    settings:
+      base:
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: SwiftDenon
 schemes:
   SwiftDenon:
     build:
@@ -45,3 +56,6 @@ schemes:
         SwiftDenon: all
     run:
       config: Debug
+    test:
+      config: Debug
+      targets: [SwiftDenonUITests]
