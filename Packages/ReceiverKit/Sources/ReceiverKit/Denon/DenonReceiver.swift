@@ -43,8 +43,21 @@ public actor DenonReceiver: Receiver {
     private func open() async throws {
         connection?.cancel()
         buffer.removeAll()
-        let c = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
+        // Keepalive notices a receiver that vanished without closing the socket (left the network,
+        // lost power), which TCP would otherwise only find out about on the next write.
+        let tcp = NWProtocolTCP.Options()
+        tcp.enableKeepalive = true
+        tcp.keepaliveIdle = 10
+        tcp.keepaliveInterval = 5
+        tcp.keepaliveCount = 3
+        let c = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!,
+                             using: NWParameters(tls: nil, tcp: tcp))
         connection = c
+        // The route to the receiver went away (Wi-Fi off, different network): drop and retry.
+        c.viabilityUpdateHandler = { [weak self] viable in
+            guard !viable, let self else { return }
+            Task { await self.connectionEnded(c) }
+        }
         c.stateUpdateHandler = { [weak self] s in
             guard let self else { return }
             Task { await self.handle(s, from: c) }
@@ -78,6 +91,13 @@ public actor DenonReceiver: Receiver {
         }
     }
 
+    /// The peer closed the connection, it errored, or its route disappeared. Cancelling routes
+    /// through `handle(.cancelled)`, which marks us disconnected and schedules a reconnect.
+    private func connectionEnded(_ c: NWConnection) {
+        guard c === connection else { return }
+        c.cancel()
+    }
+
     private func fail(_ error: Error) {
         setConnected(false)
         if let k = pending { pending = nil; k.resume(throwing: error); return }
@@ -106,7 +126,7 @@ public actor DenonReceiver: Receiver {
             guard let self else { return }
             Task {
                 if let data { await self.consume(data) }
-                if error == nil, !done { self.receive(on: c) }
+                if error == nil, !done { self.receive(on: c) } else { await self.connectionEnded(c) }
             }
         }
     }
