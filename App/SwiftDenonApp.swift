@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct SwiftDenonApp: App {
     static let remoteWindowID = "remote"
+    static let settingsWindowID = "settings"
     @State private var store: ReceiverStore
     #if os(macOS)
     @State private var menuBarIcon: MenuBarIconModel
@@ -35,9 +36,13 @@ struct SwiftDenonApp: App {
         #endif
 
         #if os(macOS)
-        Settings {
+        // A plain Window rather than the Settings scene: that one lays its toolbar out on a second
+        // row under the traffic lights, while a Window gets the same single-row bar as the remote.
+        Window("Settings", id: Self.settingsWindowID) {
             SettingsView().environment(store)
         }
+        .windowResizability(.contentSize)
+        .commands { SettingsCommand() }
 
         // Read here so the scene updates when the receiver appears or goes away.
         let inserted = showInMenuBar && (!hideMenuBarWhenAway || menuBarIcon.reachable)
@@ -53,3 +58,17 @@ struct SwiftDenonApp: App {
         #endif
     }
 }
+
+#if os(macOS)
+/// Puts "Settings…" (⌘,) in the app menu, where the Settings scene would have.
+private struct SettingsCommand: Commands {
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some Commands {
+        CommandGroup(replacing: .appSettings) {
+            Button("Settings…") { openWindow(id: SwiftDenonApp.settingsWindowID) }
+                .keyboardShortcut(",")
+        }
+    }
+}
+#endif

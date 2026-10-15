@@ -5,7 +5,7 @@ struct RemoteView: View {
     @Environment(ReceiverStore.self) private var store
     @State private var showSettings = false
     #if os(macOS)
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
     #endif
     @AppStorage("arrowKeysSwitchZones") private var arrowKeysSwitchZones = false
     @AppStorage("hideVolumeSlider") private var hideVolumeSlider = false
@@ -58,7 +58,7 @@ struct RemoteView: View {
             ToolbarItem(placement: .primaryAction) {
                 GlassCircleButton(symbol: "gearshape", size: 12, iconSize: 15) {
                     #if os(macOS)
-                    openSettings()
+                    openWindow(id: SwiftDenonApp.settingsWindowID)
                     #else
                     showSettings = true
                     #endif

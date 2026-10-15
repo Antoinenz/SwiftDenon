@@ -218,6 +218,10 @@ User: *"volume scroll works, but theres no haptic on scroll. also set the half s
 - The zone picker is hidden until the receiver is connected.
 - Third attempt at the settings bar. Checked properly this time: a sheet with a `NavigationStack` puts `Done` in a bottom bar and drops the principal item, so no sheet can have a top glass toolbar. Settings is now a `Settings` scene (a normal window) with a native segmented picker in the toolbar, which is the same glass as the main window's zone picker. The hand-built bar and Done button are gone from the macOS path; `GlassSegmented` stays for the menu bar.
 
+## 29. Settings bar alignment
+
+User sent a screenshot: the switcher sat on its own row below the traffic lights. The `Settings` scene gives a preferences-style two-row title bar, so settings became a plain `Window` scene with a `Commands` entry for ⌘,. The switcher is now level with the traffic lights, as in the main window.
+
 ---
 
 ## Testing notes that shaped the work
