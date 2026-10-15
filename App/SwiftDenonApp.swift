@@ -3,10 +3,19 @@ import SwiftUI
 @main
 struct SwiftDenonApp: App {
     static let remoteWindowID = "remote"
-    @State private var store = ReceiverStore()
+    @State private var store: ReceiverStore
     #if os(macOS)
+    @State private var menuBarIcon: MenuBarIconModel
     @AppStorage("showInMenuBar") private var showInMenuBar = true
     #endif
+
+    init() {
+        let store = ReceiverStore()
+        _store = State(initialValue: store)
+        #if os(macOS)
+        _menuBarIcon = State(initialValue: MenuBarIconModel(store: store))
+        #endif
+    }
 
     var body: some Scene {
         WindowGroup(id: Self.remoteWindowID) {
@@ -26,18 +35,9 @@ struct SwiftDenonApp: App {
         MenuBarExtra(isInserted: $showInMenuBar) {
             MenuBarView().environment(store)
         } label: {
-            Image(systemName: menuBarSymbol)
+            Image(nsImage: menuBarIcon.image)
         }
         .menuBarExtraStyle(.window)
         #endif
     }
-
-    #if os(macOS)
-    /// Filled while the zone is playing, outlined when it's off or disconnected, crossed out when muted.
-    private var menuBarSymbol: String {
-        let zone = store.zone
-        guard store.state.connected, zone.power else { return "hifispeaker.2" }
-        return zone.mute ? "speaker.slash.fill" : "hifispeaker.2.fill"
-    }
-    #endif
 }
